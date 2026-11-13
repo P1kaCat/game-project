@@ -1,9 +1,27 @@
-# Isometric RPG — character & graphics prototype
+# ASTHYA — isometric dark fantasy pixel-art RPG
 
-Graphical foundation for an isometric pixel-art RPG (PC + mobile, multiplayer
-later). This milestone contains the isometric test ground, the first playable
-character, PC + Android controls and builds — no combat, inventory, quests or
-networking yet.
+*Un monde au-delà de l'oubli.* Godot 4.7, PC (Windows) + Android, all
+player-facing text in French (localization-ready).
+
+Version 0.6.0 is the first narrative build: main menu → opening cinematic
+("L'Inscriptible", 5 illustrated scenes, hold-to-skip) → awakening in the
+Prairie de l'Éveil → optional first conversation with Eldric, the wandering
+merchant → his shop. Settings, local save slots and a pause menu included.
+
+## Asthya systems (0.6.0)
+
+| System | Files | Notes |
+|---|---|---|
+| Main menu | `scenes/main_menu.tscn`, `scripts/menu/main_menu.gd` | 1:1 illustration with slow parallax, dithered fog, motes; Continuer disabled without a valid save; Quitter hidden on Android (back button asks to quit) |
+| Settings | `scripts/core/settings.gd`, `scripts/ui/settings_panel.gd` | `user://settings.cfg`; audio buses, fullscreen (PC only), pixel scale, UI size, text speed, camera smoothing, joystick size/opacity, language |
+| Saves | `scripts/core/game_state.gd`, `scripts/core/save_system.gd`, `scripts/ui/save_slots_panel.gd` | `user://saves/{auto,1,2,3}.json`, SHA-256 checksum, field validation, atomic write + `.bak`; corrupted files shown as unreadable, never loaded |
+| Pause | `scripts/menu/pause_menu.gd` | Escape / Start / Android back / touch button; save, settings, main menu |
+| Cinematic | `scenes/cinematic.tscn`, `scripts/story/cinematic.gd`, `data/story/intro.json` | data-driven beats (narration, voice, flash, portrait, sfx, title); tap = next line, hold 1.2 s = skip |
+| Story start | `scripts/world/test_world.gd` | kneeling → get-up animation → control; autosave after story beats, conversations and every 2 min |
+| Dialogue | `data/dialogues/eldric_merchant.json` | `start_rules` pick the intro or the merchant greeting from saved flags; `anim` / `pause` per line; `player` speaker shown as "???" |
+| Localization | `scripts/core/loc.gd`, `data/i18n/fr.json` | add `en.json` + `*.en.json` data files for English |
+| UI kit | `scripts/ui/ui_theme.gd`, `tools/ui/make_ui_art.py`, `tools/ui/make_logo.py` | charcoal / ivory / tarnished silver / brass, 9-slice, hand-placed pixels |
+| Audio | `scripts/core/audio.gd`, `tools/audio/synth_sounds.py` | procedurally synthesized ambiences and UI sounds (PixelLab sound effects need a Tier 2 plan) |
 
 ![Gameplay](docs/images/gameplay.gif)
 
@@ -169,10 +187,20 @@ with `tools/release/build.sh` and publishes `manifest.json`,
 
 ```sh
 xvfb-run godot --path . --rendering-driver opengl3 -- --autotest [--shots=/abs/dir]
+xvfb-run godot --path . --rendering-driver opengl3 -- --autotest --flow-test [--shots=/abs/dir]
 godot --headless --path . --export-pack "Android" build/android/IsoRPG-android.pck
 xvfb-run godot --main-pack build/android/IsoRPG-android.pck -- --autotest   # exported game data
 godot --path . --resolution 2400x1080 -- --autotest --layout-only --fake-safe-area=110,0,0,0
 ```
+
+`--autotest` skips the main menu (sandbox game, story already seen) so the
+movement / NPC suites stay independent of the story. `--flow-test`
+(`scripts/debug/autotest_flow.gd`, 96 checks; deletes the test profile's saves
+and settings) plays the real flow: menu states, settings persistence, new game,
+the whole cinematic (accelerated) with its exact lines, awakening, the first
+Eldric conversation and its three choices, shop, autosave, pause + manual
+save, back to the menu, Continue, truncated / edited saves, new game over a
+save (confirmation) and hold-to-skip.
 
 `scripts/debug/autotest.gd` drives the real game. The keyboard path goes
 through the InputMap actions. The touch path injects `InputEventScreenTouch` /
@@ -263,7 +291,9 @@ adding an animation is just a sheet plus a JSON entry.
 ## Code structure
 
 ```
-scenes/main.tscn               test world: terrain, y-sorted entities (blocks + player), camera, HUD
+scenes/main_menu.tscn          main menu (entry after the launcher)
+scenes/cinematic.tscn          opening cinematic
+scenes/main.tscn               starting area: terrain, y-sorted entities (blocks + player), camera, HUD
 scenes/player.tscn             CharacterBody2D + DirectionalSprite + feet capsule + emote
 scenes/ui/mobile_hud.tscn      CanvasLayer: TouchJoystick + TouchActionButton
 scripts/core/iso.gd            2:1 projection helpers, tile size

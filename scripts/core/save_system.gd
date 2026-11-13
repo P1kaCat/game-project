@@ -147,5 +147,8 @@ static func delete_slot(slot: String) -> void:
 			DirAccess.remove_absolute(path_of(slot) + suffix)
 
 
+## Over the canonical JSON of `data` as it reads back from disk (JSON numbers
+## come back as floats, so the dictionary is round-tripped first).
 static func _checksum(data: Dictionary) -> String:
-	return JSON.stringify(data, "", true).sha256_text()
+	var canonical = JSON.parse_string(JSON.stringify(data))
+	return JSON.stringify(canonical, "", true).sha256_text()

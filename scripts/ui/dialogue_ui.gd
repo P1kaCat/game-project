@@ -30,6 +30,10 @@ const BOX_HEIGHT := 88
 ## Portraits are 128 px pixel art shown 1:1 as a bust standing on the box's
 ## left edge (it rises above the box), never resampled.
 const PORTRAIT := 128
+## Narrow screens (4:3 tablets...): the face is cropped 1:1 to fit inside the box.
+const COMPACT_PORTRAIT := 72
+const COMPACT_WIDTH := 420.0
+const FACE_CROP := Rect2(28, 6, 72, 72)
 const MARGIN := 6
 
 var manager: DialogueManager
@@ -41,6 +45,10 @@ var _box: PanelContainer
 var _portrait_holder: Control
 var _text_spacer: Control
 var _portrait: TextureRect
+var _portrait_bg: ColorRect
+var _portrait_frame: NinePatchRect
+var _portrait_src: Texture2D
+var _compact := false
 var _name: Label
 var _text: Label
 var _arrow: TextureRect
@@ -103,6 +111,7 @@ func _build() -> void:
 	bg.size = Vector2(PORTRAIT, PORTRAIT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait_holder.add_child(bg)
+	_portrait_bg = bg
 	_portrait = TextureRect.new()
 	_portrait.position = Vector2(4, 4)
 	_portrait.size = Vector2(PORTRAIT, PORTRAIT)
@@ -119,6 +128,7 @@ func _build() -> void:
 	frame.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_portrait_holder.add_child(frame)
+	_portrait_frame = frame
 
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -165,11 +175,19 @@ func _layout() -> void:
 		return
 	var safe := SafeArea.viewport_rect(vp)
 	_root.size = vp.get_visible_rect().size
-	_box.position = Vector2(safe.position.x + MARGIN, safe.end.y - MARGIN - BOX_HEIGHT).round()
-	_box.size = Vector2(safe.size.x - 2 * MARGIN, BOX_HEIGHT).round()
+	var box_h := roundf(BOX_HEIGHT * UITheme.ui_scale)  # 3 lines at any text size
+	_box.position = Vector2(safe.position.x + MARGIN, safe.end.y - MARGIN - box_h).round()
+	_box.size = Vector2(safe.size.x - 2 * MARGIN, box_h).round()
 	_arrow.position = _box.position + _box.size - Vector2(18, 14)
-	# Bust: bottom of the frame sits on the box's bottom border, left-aligned.
-	_portrait_holder.position = Vector2(_box.position.x + 2, _box.position.y + _box.size.y - PORTRAIT - 8 - 2).round()
+	var compact := _box.size.x + 2 * MARGIN < COMPACT_WIDTH
+	if compact != _compact or _portrait_holder.size.x != _portrait_size() + 8:
+		_compact = compact
+		_apply_portrait_size()
+	if _compact:
+		_portrait_holder.position = Vector2(_box.position.x + 6, _box.position.y + (_box.size.y - _portrait_holder.size.y) / 2.0).round()
+	else:
+		# Bust: bottom of the frame sits on the box's bottom border, left-aligned.
+		_portrait_holder.position = Vector2(_box.position.x + 2, _box.position.y + _box.size.y - PORTRAIT - 8 - 2).round()
 	if _choices_panel.visible:
 		_layout_choices()
 
@@ -184,11 +202,35 @@ func _layout_choices() -> void:
 	var font := UITheme.get_theme().default_font if UITheme.get_theme().default_font else ThemeDB.fallback_font
 	for b in _choices_box.get_children():
 		w = maxf(w, font.get_string_size((b as Button).text, HORIZONTAL_ALIGNMENT_LEFT, -1, UITheme.font_size()).x)
-	w = clampf(w + 40, 120, _box.size.x * 0.6)
+	w = clampf(w + 40, 120, _box.size.x * (0.8 if _compact else 0.6))
 	var h := _choices_box.get_child_count() * (_choice_row_height() + 3) - 3 + 16
 	_choices_panel.size = Vector2(w, h).round()
 	_choices_panel.position = Vector2(_box.position.x + _box.size.x - w, _box.position.y - 4 - h).round()
 	_update_cursor()
+
+
+func _portrait_size() -> int:
+	return COMPACT_PORTRAIT if _compact else PORTRAIT
+
+
+func _apply_portrait_size() -> void:
+	var p := Vector2.ONE * _portrait_size()
+	_portrait_holder.size = p + Vector2(8, 8)
+	_portrait_bg.size = p
+	_portrait.size = p
+	_portrait_frame.size = p + Vector2(8, 8)
+	_text_spacer.custom_minimum_size.x = p.x + 6
+	_set_portrait_texture()
+
+
+func _set_portrait_texture() -> void:
+	if _portrait_src == null or not _compact:
+		_portrait.texture = _portrait_src
+		return
+	var a := AtlasTexture.new()
+	a.atlas = _portrait_src
+	a.region = FACE_CROP
+	_portrait.texture = a
 
 
 ## Viewport area left free for the game world while the window is open
@@ -197,7 +239,7 @@ func free_rect() -> Rect2:
 	var safe := SafeArea.viewport_rect(get_viewport())
 	var right := _box.position.x + _box.size.x - 200.0
 	var left := safe.position.x
-	if _portrait_holder.visible:
+	if _portrait_holder.visible and not _compact:
 		left = _portrait_holder.position.x + _portrait_holder.size.x
 	return Rect2(left, safe.position.y,
 		maxf(80.0, right - left), maxf(60.0, _box.position.y - safe.position.y - 4))
@@ -206,7 +248,7 @@ func free_rect() -> Rect2:
 ## Screen rects covered by the window (for tests / overlap checks).
 func covered_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = [Rect2(_box.position, _box.size)]
-	if _portrait_holder.visible:
+	if _portrait_holder.visible and not _compact:
 		out.append(Rect2(_portrait_holder.position, _portrait_holder.size))
 	if _choices_panel.visible:
 		out.append(Rect2(_choices_panel.position, _choices_panel.size))
@@ -260,7 +302,8 @@ func _on_step(step: Dictionary) -> void:
 	_name.text = str(step.get("name", ""))
 	_name.add_theme_color_override("font_color", UITheme.SILVER if step.get("speaker", "") == "player" else UITheme.GOLD)
 	var tex: Texture2D = step.get("portrait")
-	_portrait.texture = tex
+	_portrait_src = tex
+	_set_portrait_texture()
 	_portrait_holder.visible = tex != null
 	_text_spacer.visible = tex != null
 	chars_per_second = Settings.text_cps()

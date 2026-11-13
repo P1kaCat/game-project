@@ -228,7 +228,8 @@ func _layout() -> void:
 		return
 	var safe := SafeArea.viewport_rect(vp)
 	_root.size = vp.get_visible_rect().size
-	var w := clampf(roundf(safe.size.x * 0.64), 290.0, 380.0)
+	# keep >= 64 px of world visible on the left (both characters) on narrow screens
+	var w := clampf(roundf(safe.size.x * 0.64), minf(290.0, safe.size.x - 2 * MARGIN - 64.0), 380.0)
 	var h := safe.size.y - 2 * MARGIN
 	_panel.position = Vector2(safe.end.x - MARGIN - w, safe.position.y + MARGIN).round()
 	_panel.size = Vector2(w, h).round()

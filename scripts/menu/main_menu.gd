@@ -44,7 +44,7 @@ func _ready() -> void:
 	_layout()
 	_intro_animation()
 	Audio.ambience("amb_menu", 2.5, -6.0)
-	if "--flow-test" in args:
+	if "--flow-test" in args and not get_tree().root.has_node(^"FlowTest"):
 		var t: Node = load("res://scripts/debug/autotest_flow.gd").new()
 		t.name = "FlowTest"
 		get_tree().root.add_child.call_deferred(t)
@@ -248,12 +248,16 @@ func _add_overlay(c: Control) -> Control:
 ## gets focus back when it closes.
 func _open(c: Control) -> Control:
 	_overlay_open = true
+	var back_to := get_viewport().gui_get_focus_owner()
 	c.tree_exited.connect(func() -> void:
 		_overlay_open = get_children().any(func(n: Node) -> bool:
 			return (n is ConfirmDialog or n is SettingsPanel or n is SaveSlotsPanel) and not n.is_queued_for_deletion())
 		if not _overlay_open and is_inside_tree():
 			_refresh_buttons()
-			_focus_first.call_deferred())
+			if is_instance_valid(back_to) and back_to is Button and not back_to.disabled:
+				back_to.grab_focus.call_deferred()
+			else:
+				_focus_first.call_deferred())
 	return c
 
 

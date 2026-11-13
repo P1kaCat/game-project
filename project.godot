@@ -5,13 +5,15 @@ config_version=5
 
 [application]
 
-config/name="Isometric RPG Prototype"
-config/description="Player character movement test on a 64x32 isometric grid."
+config/name="Asthya"
+config/description="Asthya - isometric dark fantasy pixel-art RPG."
 run/main_scene="res://scenes/launcher.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.png"
 config/quit_on_go_back=false
-config/version="0.5.1"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Asthya"
+config/version="0.6.0"
 
 [autoload]
 

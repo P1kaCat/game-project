@@ -56,7 +56,7 @@ func _ready() -> void:
 	if GameState.awakening_pending:
 		_play_awakening()
 
-	if "--autotest" in OS.get_cmdline_user_args():
+	if "--autotest" in OS.get_cmdline_user_args() and not "--flow-test" in OS.get_cmdline_user_args():
 		var test := preload("res://scripts/debug/autotest.gd").new()
 		test.name = "Autotest"
 		add_child(test)
@@ -144,7 +144,9 @@ func _play_awakening() -> void:
 	sprite.frame = 0
 	camera.follow_speed = 1.1
 	camera.start_offset(Vector2(0, -90))
-	await get_tree().create_timer(2.4).timeout
+	while SceneFade.is_busy():  # the player must see the kneeling pose
+		await get_tree().process_frame
+	await get_tree().create_timer(1.8).timeout
 	Audio.sfx("getup", -6.0)
 	sprite.play()
 	await sprite.animation_finished

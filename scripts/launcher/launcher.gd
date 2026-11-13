@@ -275,7 +275,7 @@ func _build_ui() -> void:
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	box.add_child(icon)
 	var title := Label.new()
-	title.text = "Iso RPG"
+	title.text = "Asthya"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 16)
 	title.add_theme_color_override("font_color", Color(0.95, 0.85, 0.55))

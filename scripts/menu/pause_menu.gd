@@ -122,6 +122,8 @@ func _add(id: String, key: String, cb: Callable) -> void:
 
 
 func _process(_d: float) -> void:
+	# touch pause button only when pausing is possible (not in dialogue / shop / story)
+	_touch_button.visible = GameInput.touch_ui_enabled and not is_open and can_open.call()
 	if _cursor and is_instance_valid(_cursor):
 		MenuKit.place_cursor(_cursor, _col)
 
