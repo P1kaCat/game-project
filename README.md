@@ -81,10 +81,12 @@ the two update kinds. Downloaded content is cached in `user://content/`.
 **Publishing a version**
 
 ```sh
-git tag v0.4.1 && git push origin v0.4.1
+python3 tools/release/set_version.py 0.4.1
+git commit -am "Release v0.4.1" && git push      # to the default branch
 ```
 
-`.github/workflows/release.yml` then sets the version from the tag, builds
+(or push a tag `v0.4.1`). `.github/workflows/release.yml` then creates the
+tag and release if they don't exist yet, builds
 with `tools/release/build.sh` and publishes `manifest.json`,
 `game-windows.pck`, `game-android.pck`, `IsoRPG-windows.zip` and `IsoRPG.apk`.
 
