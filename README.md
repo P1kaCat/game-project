@@ -1,8 +1,9 @@
 # Isometric RPG — character & graphics prototype
 
 Graphical foundation for an isometric pixel-art RPG (PC + mobile, multiplayer
-later). This milestone contains **only** the isometric test ground and the
-first playable character — no combat, inventory, quests or networking yet.
+later). This milestone contains the isometric test ground, the first playable
+character, PC + Android controls and builds — no combat, inventory, quests or
+networking yet.
 
 ![Gameplay](docs/images/gameplay.gif)
 
@@ -11,31 +12,86 @@ Every sprite and tile here was generated with the real **PixelLab API v2**
 
 ## Run it
 
-Requires **Godot 4.7** (GL Compatibility renderer, so it also runs on mobile/web).
+Requires **Godot 4.7** (GL Compatibility renderer: PC, Android, web).
 
 ```sh
 godot --path .            # opens the movement test scene (scenes/main.tscn)
 ```
 
-| Action | Keys |
-|---|---|
-| Move (8 directions) | **WASD** on QWERTY = **ZQSD** on AZERTY (physical key positions), arrow keys, left stick |
-| Run | **Shift** / gamepad A |
+| Action | PC | Gamepad | Touch (Android) |
+|---|---|---|---|
+| Move (8 directions) | **WASD** on QWERTY = **ZQSD** on AZERTY (physical key positions), arrow keys | left stick | joystick, bottom-left |
+| Run | **Shift** | A | push the joystick to full tilt |
+| Interact (placeholder) | **E** / **Space** | X | **A** button, bottom-right |
 
-Idle, walk and run animations switch automatically, and the character faces
-whichever direction it moves.
+The touch HUD shows automatically on Android/iOS. On PC it stays hidden, unless
+a real touchscreen is touched or you pass `-- --touch-ui`.
 
-### Automated check
+![Touch HUD](docs/images/touch_hud.png)
+
+## Build
+
+Both presets are in `export_presets.cfg` (committed). Build outputs go to
+`build/` (git-ignored).
 
 ```sh
-xvfb-run godot --path . --rendering-driver opengl3 -- --autotest [--shots=/abs/dir] [--frames]
+godot --headless --path . --export-debug   "Android"         build/android/IsoRPG-debug.apk
+godot --headless --path . --export-release "Windows Desktop" build/windows/IsoRPG.exe
+adb install -r build/android/IsoRPG-debug.apk
 ```
 
-This holds real input actions for each of the 8 directions, plus run and idle.
-For each step it checks the playing animation, the ground speed (diagonals
-normalised), screen direction (diagonals follow the 2:1 tile edges), and that
-the player stays on the map. It prints `SUMMARY PASS` and exits with code 0
-when everything passes.
+| | Android preset | Windows preset |
+|---|---|---|
+| Output | debug APK, signed with the Android debug key (v2 + v3) | single `.exe`, game data embedded |
+| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.2.0 (code 2) | Iso RPG |
+| CPU | **arm64-v8a** only | x86_64 |
+| Orientation | landscape (`userLandscape`), immersive, edge-to-edge (safe area handled in-game) | 1440 × 810 window, resizable |
+| Permissions | **none** | n/a |
+
+**Android toolchain** (one-time; this is what the build machine used):
+- Godot 4.7 export templates in `~/.local/share/godot/export_templates/4.7.stable/`
+  (`android_debug.apk`, `android_release.apk`, Windows templates).
+- JDK 17+ (built with OpenJDK 21). Editor setting `export/android/java_sdk_path`.
+- Android SDK with `platform-tools` and `build-tools;35.0.1` (apksigner, zipalign).
+  Editor setting `export/android/android_sdk_path`.
+- A debug keystore (`keytool -genkeypair -keystore debug.keystore -alias androiddebugkey
+  -storepass android -keypass android -keyalg RSA -validity 10000 -dname "CN=Android Debug,O=Android,C=US"`).
+  Editor setting `export/android/debug_keystore`.
+- Gradle is **not** needed; the preset uses Godot's prebuilt APK template.
+
+A store/release build would additionally need a private release keystore
+(`keystore/release*` in the preset, or `GODOT_ANDROID_KEYSTORE_RELEASE_*` env vars).
+
+## Testing
+
+```sh
+xvfb-run godot --path . --rendering-driver opengl3 -- --autotest [--shots=/abs/dir]
+godot --headless --path . --export-pack "Android" build/android/IsoRPG-android.pck
+xvfb-run godot --main-pack build/android/IsoRPG-android.pck -- --autotest   # exported game data
+godot --path . --resolution 2400x1080 -- --autotest --layout-only --fake-safe-area=110,0,0,0
+```
+
+`scripts/debug/autotest.gd` drives the real game. The keyboard path goes
+through the InputMap actions. The touch path injects `InputEventScreenTouch` /
+`InputEventScreenDrag` events in window pixels, exactly as Android delivers
+them. It runs 87 checks, including:
+- 8 directions by keyboard and by joystick: sprite, animation, normalised
+  speed, iso screen direction
+- idle/walk/run transitions, no per-frame animation restarts, last facing kept
+- staggered key release keeps the diagonal facing; no direction flicker
+  when the stick hovers on a sector boundary
+- identical distance at 30/60/120 Hz physics (frame-rate independence)
+- camera follow, re-centring and whole-pixel player offset
+- block collision (no entry, clean stop in corners, sliding along faces) and
+  the map edge
+- joystick dead zone, analog intensity, full-tilt run, 360° input snapped to
+  8 directions, release, OS touch cancel, focus loss
+- multitouch: action button pressed while the joystick finger keeps steering
+- keyboard still works with the touch HUD active; touches outside the
+  controls are ignored
+- HUD inside the safe area, corners only, centre unobstructed
+- PixelLab assets loaded unchanged (3 animations × 8 directions, 68 × 68
+  frames, nearest filtering)
 
 ## Specifications
 
@@ -46,9 +102,14 @@ when everything passes.
 | Character body | **31 × 47 px** (south view), 8 directions |
 | Animation frame canvas | **68 × 68 px** for every frame of every animation, so nothing shifts |
 | Foot pivot | **(34, 57)** in frame pixels, placed on the ground position (tile centre) |
-| Rendering | 480 × 270 viewport, integer upscaling, nearest-neighbour filtering, 2D transforms snapped to pixels |
+| Rendering | ~270 px tall internal resolution, **whole-number upscaling that fills any screen** (`PixelScaler`: e.g. 480×270 ×4 on 1080p, 533×240 ×3 on 720p phones, 542×244 ×5 on 1220p), nearest-neighbour filtering, 2D transforms snapped to pixels, physics interpolation for high-refresh screens |
 
 **Movement model.** Input and velocity live in an undistorted "ground" plane.
+Acceleration and braking are framerate-independent; analog input is snapped
+to the 8 sprite directions (with hysteresis) so movement always matches the
+drawn facing. Collision is real physics (`CharacterBody2D.move_and_slide`)
+against the map outline and raised blocks; a blocked push that would only
+jitter (head-on or in an inside corner) stops cleanly instead.
 `Iso.ground_to_screen()` halves the vertical component (the 2:1 camera). This
 keeps diagonal speed normalised in ground space, and moving diagonally
 travels exactly along the tile edges, slope (2, 1). Speeds (walk 50 px/s,
@@ -90,16 +151,29 @@ adding an animation is just a sheet plus a JSON entry.
 ## Code structure
 
 ```
-scenes/main.tscn            test world (terrain + y-sorted entities + player)
-scenes/player.tscn          CharacterBody2D + DirectionalSprite + Camera2D
-scripts/core/iso.gd         2:1 projection helpers, tile size
-scripts/core/direction8.gd  vector <-> 8-direction codes
-scripts/player/player.gd    input, movement, idle/walk/run selection, stay-on-ground
-scripts/player/directional_sprite.gd   metadata-driven 8-dir AnimatedSprite2D
-scripts/world/iso_terrain.gd           TileMapLayer + TileSet from the PixelLab atlas
-scripts/world/test_world.gd            builds the 16x16 test map, spawns the player
-scripts/debug/autotest.gd              scripted verification / screenshots
+scenes/main.tscn               test world: terrain, y-sorted entities (blocks + player), camera, HUD
+scenes/player.tscn             CharacterBody2D + DirectionalSprite + feet capsule + emote
+scenes/ui/mobile_hud.tscn      CanvasLayer: TouchJoystick + TouchActionButton
+scripts/core/iso.gd            2:1 projection helpers, tile size
+scripts/core/direction8.gd     vector <-> 8 directions, hysteresis
+scripts/core/pixel_scaler.gd   autoload: whole-number full-screen scaling
+scripts/input/game_input.gd    autoload: merges keyboard/gamepad + touch into one intent
+scripts/player/player.gd       movement, facing, collision response, idle/walk/run, interact hook
+scripts/player/directional_sprite.gd  metadata-driven 8-dir AnimatedSprite2D
+scripts/camera/follow_camera.gd       smooth, pixel-stable follow camera
+scripts/world/terrain_tileset.gd      TileSet: ground + raised (solid) variants of each terrain
+scripts/world/iso_terrain.gd          ground layer, test map, map-edge collision
+scripts/world/iso_obstacles.gd        raised solid blocks (y-sorted with characters)
+scripts/ui/touch_joystick.gd          analog stick: dead zone, multitouch, cancel, auto-centre
+scripts/ui/touch_action_button.gd     round touch button -> InputMap action ("interact")
+scripts/ui/mobile_hud.gd              HUD visibility, density-aware sizing, safe-area layout
+scripts/debug/autotest.gd             scripted runtime verification
 ```
+
+**Extending:** new input sources only touch `GameInput`. A new on-screen
+button is a `TouchActionButton` with another `action`. A new animation is a
+sprite sheet plus a JSON entry. Solid scenery can use the `RAISED` tile
+variant, or any physics body on collision layer 1.
 
 ## PixelLab pipeline
 
@@ -143,6 +217,12 @@ mirroring was needed.
   later if memory matters.
 - The run cycle's foot baseline varies by ±2 px (airborne frames). That's
   intentional motion, not drift.
+- Not tested on a physical Android device or emulator from this build machine
+  (no device/KVM). Touch was verified with injected OS-style touch events in
+  the exported game data; the APK manifest, ABI and signature were verified
+  with `aapt2` / `apksigner`.
+- The raised blocks reuse the ground tile art (a one-step ledge); proper props
+  and cliffs are future art.
 - Grass tiles have slight edge shading, so a faint grid stays visible on large
   grass areas. Good enough for a movement test; a proper Wang/terrain-transition
   set is future work.

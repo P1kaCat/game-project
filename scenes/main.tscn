@@ -1,8 +1,11 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/test_world.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/world/iso_terrain.gd" id="2_terrain"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="Script" path="res://scripts/world/iso_obstacles.gd" id="3_obstacles"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="4_player"]
+[ext_resource type="Script" path="res://scripts/camera/follow_camera.gd" id="5_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/mobile_hud.tscn" id="6_hud"]
 
 [node name="TestWorld" type="Node2D"]
 script = ExtResource("1_world")
@@ -14,4 +17,15 @@ script = ExtResource("2_terrain")
 [node name="Entities" type="Node2D" parent="."]
 y_sort_enabled = true
 
-[node name="Player" parent="Entities" instance=ExtResource("3_player")]
+[node name="Obstacles" type="TileMapLayer" parent="Entities"]
+texture_filter = 1
+y_sort_enabled = true
+script = ExtResource("3_obstacles")
+
+[node name="Player" parent="Entities" instance=ExtResource("4_player")]
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("5_camera")
+target = NodePath("../Entities/Player")
+
+[node name="MobileHUD" parent="." instance=ExtResource("6_hud")]

@@ -1,67 +1,80 @@
 class_name IsoTerrain
 extends TileMapLayer
-## Isometric ground layer built from the PixelLab terrain atlas.
-##
-## Cells are 64x32 (true 2:1 diamonds). Each terrain texture is 64x64: its top
-## face is an exact 64x32 diamond centred at (32, 38) with ~10 px of earth side
-## below (see assets/tiles/terrain/terrain.json). `texture_origin` shifts the
-## texture so that top face sits exactly on the cell diamond.
+## Walkable isometric ground. Builds the test map and a collision boundary along
+## the map's outer diamond so the player cannot walk off the ground.
 
-enum Terrain { GRASS, GRASS_FLOWERS, DIRT, COBBLESTONE }
+const Terrain := TerrainTileSet.Terrain
 
-const ATLAS := preload("res://assets/tiles/terrain/terrain_atlas.png")
-const TEXTURE_SIZE := Vector2i(64, 64)
-const TOP_FACE_CENTER := Vector2i(32, 38)
-const SOURCE_ID := 0
+var map_size := 0
 
 
 func _init() -> void:
-	tile_set = _build_tile_set()
+	tile_set = TerrainTileSet.get_tile_set()
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 
-static func _build_tile_set() -> TileSet:
-	var ts := TileSet.new()
-	ts.tile_shape = TileSet.TILE_SHAPE_ISOMETRIC
-	ts.tile_layout = TileSet.TILE_LAYOUT_DIAMOND_DOWN
-	ts.tile_size = Iso.TILE_SIZE
-
-	var src := TileSetAtlasSource.new()
-	src.texture = ATLAS
-	src.texture_region_size = TEXTURE_SIZE
-	# Texture is drawn centred on the cell, then moved by -texture_origin.
-	var origin := TOP_FACE_CENTER - TEXTURE_SIZE / 2
-	for i in Terrain.size():
-		var coords := Vector2i(i, 0)
-		src.create_tile(coords)
-		src.get_tile_data(coords, 0).texture_origin = origin
-	ts.add_source(src, SOURCE_ID)
-	return ts
+func set_terrain(cell: Vector2i, terrain: int) -> void:
+	set_cell(cell, TerrainTileSet.SOURCE_ID, Vector2i(terrain, 0), TerrainTileSet.GROUND)
 
 
-func set_terrain(cell: Vector2i, terrain: Terrain) -> void:
-	set_cell(cell, SOURCE_ID, Vector2i(terrain, 0))
-
-
-## Fills a small deterministic test map: grass field, two dirt paths along the
-## grid axes and a cobblestone plaza in the middle.
+## Deterministic test map: grass field, two dirt paths along the grid axes and a
+## cobblestone plaza in the middle. Also (re)builds the edge collision.
 func build_test_map(size: int = 16) -> void:
 	clear()
+	map_size = size
 	var mid := size / 2
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1337
 	for y in size:
 		for x in size:
-			var cell := Vector2i(x, y)
-			var t := Terrain.GRASS
+			var t: int = Terrain.GRASS
 			if rng.randf() < 0.18:
 				t = Terrain.GRASS_FLOWERS
 			if x == mid or y == mid:
 				t = Terrain.DIRT
 			if absi(x - mid) <= 1 and absi(y - mid) <= 1:
 				t = Terrain.COBBLESTONE
-			set_terrain(cell, t)
+			set_terrain(Vector2i(x, y), t)
+	_build_boundary()
 
 
 func cell_center(cell: Vector2i) -> Vector2:
 	return to_global(map_to_local(cell))
+
+
+func cell_at(world_pos: Vector2) -> Vector2i:
+	return local_to_map(to_local(world_pos))
+
+
+func is_ground(cell: Vector2i) -> bool:
+	return get_cell_source_id(cell) != -1
+
+
+## Outer corners of the (square, diamond-shaped) map in local coordinates.
+func map_corners() -> PackedVector2Array:
+	var hx := Iso.TILE_SIZE.x / 2.0
+	var hy := Iso.TILE_SIZE.y / 2.0
+	var last := map_size - 1
+	return PackedVector2Array([
+		map_to_local(Vector2i(0, 0)) + Vector2(0, -hy),        # top
+		map_to_local(Vector2i(last, 0)) + Vector2(hx, 0),      # right
+		map_to_local(Vector2i(last, last)) + Vector2(0, hy),   # bottom
+		map_to_local(Vector2i(0, last)) + Vector2(-hx, 0),     # left
+	])
+
+
+func _build_boundary() -> void:
+	var old := get_node_or_null(^"Boundary")
+	if old:
+		old.free()
+	var body := StaticBody2D.new()
+	body.name = "Boundary"
+	add_child(body)
+	var c := map_corners()
+	for i in c.size():
+		var seg := SegmentShape2D.new()
+		seg.a = c[i]
+		seg.b = c[(i + 1) % c.size()]
+		var shape := CollisionShape2D.new()
+		shape.shape = seg
+		body.add_child(shape)

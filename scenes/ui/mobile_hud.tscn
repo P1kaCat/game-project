@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/mobile_hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/touch_joystick.gd" id="2_stick"]
+[ext_resource type="Script" path="res://scripts/ui/touch_action_button.gd" id="3_button"]
+
+[node name="MobileHUD" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Joystick" type="Control" parent="Root"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("2_stick")
+
+[node name="ActionButton" type="Control" parent="Root"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("3_button")
