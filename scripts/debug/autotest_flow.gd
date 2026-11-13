@@ -166,6 +166,13 @@ func _test_settings() -> void:
 	await activate(zoom)
 	check("settings: pixel scale back to normal", PixelScaler.target_height == 270)
 	check("settings: fullscreen row on desktop", panel.control_for("display/fullscreen") != null)
+	# Windows bug report: after leaving fullscreen / maximizing, the internal
+	# resolution stayed stale (picture cropped, clicks beside the buttons).
+	var good := get_tree().root.content_scale_size
+	get_tree().root.content_scale_size = Vector2i(360, 202)
+	await frames(2)
+	check("window: stale internal resolution corrected", get_tree().root.content_scale_size == good,
+		"%s (expected %s)" % [get_tree().root.content_scale_size, good])
 	await action(&"ui_cancel")
 	check("settings: Escape closes the panel", not is_instance_valid(panel) or panel.is_queued_for_deletion())
 	var cfg := ConfigFile.new()

@@ -158,7 +158,7 @@ func _layout() -> void:
 	for f in _fog_layers:
 		f.size.x = vp.x
 	if _title.texture:
-		_title.size = _title.texture.get_size() * 2
+		_title.size = _title.texture.get_size()
 		_title.position = ((vp - _title.size) / 2.0).round()
 	_caption.size = Vector2(vp.x, 16)
 	_caption.position = Vector2(0, roundf(vp.y / 2.0 - 8))

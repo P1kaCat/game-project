@@ -20,7 +20,6 @@ var buttons := {}            # id -> Button (tests)
 var _bg: TextureRect
 var _fog: Array[Atmosphere.ScrollLayer] = []
 var _logo: TextureRect
-var _ring: TextureRect
 var _subtitle: Label
 var _menu: VBoxContainer
 var _cursor: TextureRect
@@ -57,39 +56,43 @@ func _build() -> void:
 	clear.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(clear)
 	_bg = TextureRect.new()
-	_bg.texture = Atmosphere.dither_edges(load("res://assets/ui/menu_bg.png"), 20)
+	# 640x320 (outpainted from the 480x254 illustration): covers 16:9, 20:9
+	# phones and the wide pixel scale without edge bands.
+	_bg.texture = load("res://assets/ui/menu_bg.png")
+	_bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_bg)
 	# Fog bands: far (slow, faint) and near (faster, denser) = parallax depth.
-	var fog_far := Atmosphere.ScrollLayer.new(Atmosphere.fog_texture(256, 48, 7, 0.55, Color(0.62, 0.64, 0.70, 0.30)), 3.0)
+	var fog_far := Atmosphere.ScrollLayer.new(Atmosphere.soft_fog_texture(256, 48, 7, 0.55, Color(0.62, 0.64, 0.70, 0.28)), 3.0)
 	fog_far.bob = 2.0
-	var fog_near := Atmosphere.ScrollLayer.new(Atmosphere.fog_texture(320, 64, 21, 0.6, Color(0.70, 0.71, 0.76, 0.36)), -7.0)
+	var fog_near := Atmosphere.ScrollLayer.new(Atmosphere.soft_fog_texture(320, 64, 21, 0.6, Color(0.70, 0.71, 0.76, 0.32)), -7.0)
 	fog_near.bob = 3.0
 	_fog = [fog_far, fog_near]
 	for f in _fog:
 		add_child(f)
-	# Dark dithered shade behind the menu column (readability), left side.
+	# Dark shade behind the title and menu column (readability), left side:
+	# a plain gradient (the former dithered one looked like a glitch).
 	_shade = TextureRect.new()
-	_shade.texture = Atmosphere.dither_gradient(160, 8, Color(0.03, 0.03, 0.04, 0.55), true)
-	_shade.flip_h = true
-	_shade.stretch_mode = TextureRect.STRETCH_TILE
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.02, 0.02, 0.03, 0.62))
+	grad.set_color(1, Color(0.02, 0.02, 0.03, 0.0))
+	var gtex := GradientTexture2D.new()
+	gtex.gradient = grad
+	gtex.width = 128
+	gtex.height = 4
+	_shade.texture = gtex
+	_shade.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_shade.stretch_mode = TextureRect.STRETCH_SCALE
 	_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_shade)
 	_motes = Atmosphere.motes(Rect2(0, 0, 480, 270), 22, Color(0.92, 0.80, 0.55, 0.8))
 	add_child(_motes)
 
-	_ring = TextureRect.new()
-	_ring.texture = load("res://assets/ui/logo_ring.png")
-	_ring.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_ring.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_ring.size = Vector2(70, 70)
-	_ring.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_ring)
 	_logo = TextureRect.new()
 	_logo.texture = load("res://assets/ui/logo_asthya.png")
 	_logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_logo.size = _logo.texture.get_size() * 2
+	_logo.size = _logo.texture.get_size()  # drawn at 1:1 (tools/ui/make_logo.py)
 	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_logo)
 	_subtitle = Label.new()
@@ -142,13 +145,12 @@ func _layout() -> void:
 	_fog[1].position = Vector2(0, roundf(vp.y - 70))
 	_fog[1].size = Vector2(vp.x, 64)
 	_shade.position = Vector2(0, 0)
-	_shade.size = Vector2(minf(vp.x * 0.5, 230), vp.y)
+	_shade.size = Vector2(minf(vp.x * 0.6, 280), vp.y)
 	_motes.position = vp / 2.0
 	_motes.emission_rect_extents = vp / 2.0
 	var left := safe.position.x + 22.0
 	var top := safe.position.y + maxf(12.0, vp.y * 0.07)
 	_logo.position = Vector2(left, top).round()
-	_ring.position = (_logo.position + _logo.size / 2.0 - _ring.size / 2.0).round()
 	_subtitle.position = Vector2(left + 2, _logo.position.y + _logo.size.y + 3).round()
 	_menu.reset_size()
 	_menu.position = Vector2(left - 6, maxf(_subtitle.position.y + 22, safe.end.y - _menu.size.y - 18)).round()
@@ -158,12 +160,11 @@ func _layout() -> void:
 
 
 func _intro_animation() -> void:
-	for n in [_logo, _ring, _subtitle, _menu]:
+	for n in [_logo, _subtitle, _menu]:
 		n.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_interval(0.3)
 	tw.tween_property(_logo, "modulate:a", 1.0, 1.4).set_trans(Tween.TRANS_SINE)
-	tw.parallel().tween_property(_ring, "modulate:a", 0.45, 2.2).set_trans(Tween.TRANS_SINE)
 	tw.tween_property(_subtitle, "modulate:a", 1.0, 0.8)
 	tw.tween_property(_menu, "modulate:a", 1.0, 0.5)
 	tw.tween_callback(_focus_first)
@@ -189,8 +190,6 @@ func _process(delta: float) -> void:
 	var vp := get_viewport().get_visible_rect().size
 	var base := ((vp - _bg.size) / 2.0).round()
 	_bg.position = base + Vector2(roundf(sin(_t * 0.11) * 4.0), roundf(sin(_t * 0.07) * 1.0))
-	if _ring.modulate.a > 0.0 and _logo.modulate.a >= 1.0:
-		_ring.modulate.a = 0.35 + 0.12 * sin(_t * 0.8)
 	if _cursor:
 		MenuKit.place_cursor(_cursor, _menu)
 

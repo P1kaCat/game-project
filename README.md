@@ -18,7 +18,7 @@ exile, adult, Eldric at ~40 and ~50, portraits, how each was generated).
 
 | System | Files | Notes |
 |---|---|---|
-| Main menu | `scenes/main_menu.tscn`, `scripts/menu/main_menu.gd` | 1:1 illustration with slow parallax, dithered fog, motes; Continuer disabled without a valid save; Quitter hidden on Android (back button asks to quit) |
+| Main menu | `scenes/main_menu.tscn`, `scripts/menu/main_menu.gd` | 640x320 illustration (outpainted with `tools/pixellab/outpaint.py`) shown 1:1 with slow parallax, soft fog, motes; Continuer disabled without a valid save; Quitter hidden on Android (back button asks to quit) |
 | Settings | `scripts/core/settings.gd`, `scripts/ui/settings_panel.gd` | `user://settings.cfg`; audio buses, fullscreen (PC only), pixel scale, UI size, text speed, camera smoothing, joystick size/opacity, language |
 | Saves | `scripts/core/game_state.gd`, `scripts/core/save_system.gd`, `scripts/ui/save_slots_panel.gd` | `user://saves/{auto,1,2,3}.json`, SHA-256 checksum, field validation, atomic write + `.bak`; corrupted files shown as unreadable, never loaded |
 | Pause | `scripts/menu/pause_menu.gd` | Escape / Start / Android back / touch button; save, settings, main menu |
@@ -26,7 +26,8 @@ exile, adult, Eldric at ~40 and ~50, portraits, how each was generated).
 | Story start | `scripts/world/test_world.gd` | ten years later: the protagonist gets up from a nap near Eldric's camp → control; flags `intro_seen`, `entered_main_game`, `eldric_intro_done`; autosave after story beats, conversations and every 2 min |
 | Dialogue | `data/dialogues/eldric_merchant.json` | `start_rules` pick the first (familiar) conversation or the later greeting from saved flags; `anim` / `pause` per line; 192 px portraits shown 1:1 as a 160 px bust (framing in `portrait.json`), face crop on narrow screens; the player's name label is empty until the protagonist is named |
 | Localization | `scripts/core/loc.gd`, `data/i18n/fr.json` | add `en.json` + `*.en.json` data files for English |
-| UI kit | `scripts/ui/ui_theme.gd`, `tools/ui/make_ui_art.py`, `tools/ui/make_logo.py` | charcoal / ivory / tarnished silver / brass, 9-slice, hand-placed pixels |
+| UI kit | `scripts/ui/ui_theme.gd`, `tools/ui/make_ui_art.py`, `tools/ui/make_logo.py`, `tools/ui/make_icon.py` | charcoal / ivory / tarnished silver / brass, 9-slice, hand-placed pixels; title traced from Cinzel Bold (OFL, `tools/ui/fonts/`); app icon = broken inscription ring around an engraved "A" |
+| Window scaling | `scripts/core/scale_watcher.gd` | checks every frame that the internal resolution matches the real window (resize, maximize, leaving fullscreen); windowed mode is restored centred and never larger than the screen |
 | Audio | `scripts/core/audio.gd`, `tools/audio/synth_sounds.py` | procedurally synthesized ambiences and UI sounds (PixelLab sound effects need a Tier 2 plan) |
 
 ![Gameplay](docs/images/gameplay.gif)
@@ -154,7 +155,7 @@ is easily exhausted on shared IPs:
 | Release changes… | What the launcher does |
 |---|---|
 | game content only (scenes, gameplay scripts, sprites, new classes…) | downloads `game-<platform>.pck` (~0.4 MB), checks its SHA-256, **hot-loads it and starts the game: no restart, no reinstall** (PC and Android) |
-| the "base" (engine/project settings, input map, autoloads, export settings, launcher) | full update: Windows downloads `IsoRPG-windows.zip`, swaps `IsoRPG.exe` and restarts once; Android offers the new APK (or "play anyway") |
+| the "base" (engine/project settings, input map, autoloads, export settings, launcher, app icons) | full update: Windows downloads `IsoRPG-windows.zip`, swaps `IsoRPG.exe` and restarts once; Android offers the new APK (or "play anyway") |
 | nothing / offline / GitHub down | starts the game immediately (with the last downloaded content) |
 
 `tools/release/set_version.py` writes `build_info.json` with the version and

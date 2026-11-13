@@ -109,7 +109,12 @@ static func apply() -> void:
 		var is_fs := mode in [DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]
 		if fs != is_fs:
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if fs else DisplayServer.WINDOW_MODE_WINDOWED)
+			if not fs:
+				_restore_window.call_deferred()
+		elif not fs and mode == DisplayServer.WINDOW_MODE_WINDOWED:
+			_fit_window_to_screen()
 	var tree := Engine.get_main_loop() as SceneTree
+	ScaleWatcher.ensure(tree)
 	var scaler: Node = tree.root.get_node_or_null(^"PixelScaler") if tree else null
 	if scaler:
 		scaler.set("target_height", ZOOM_HEIGHT[get_value("display/zoom")])
@@ -117,6 +122,38 @@ static func apply() -> void:
 	UITheme.set_ui_scale(1.25 if get_value("display/ui_scale") == "large" else 1.0)
 	if Loc.locale != get_value("lang/locale"):
 		Loc.set_locale(get_value("lang/locale"))
+
+
+## Default windowed size (16:9), never larger than the screen's usable area.
+const WINDOW_SIZE := Vector2i(1440, 810)
+
+
+## Back to a clean, centred window after leaving fullscreen.
+static func _restore_window() -> void:
+	if DisplayServer.window_get_mode() != DisplayServer.WINDOW_MODE_WINDOWED:
+		return
+	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var size := _fitting_size(usable.size)
+	DisplayServer.window_set_size(size)
+	DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
+
+
+## A window bigger than the screen (small laptops) is shrunk and centred.
+static func _fit_window_to_screen() -> void:
+	var usable := DisplayServer.screen_get_usable_rect(DisplayServer.window_get_current_screen())
+	var win := DisplayServer.window_get_size()
+	if usable.size.x <= 0 or (win.x <= usable.size.x and win.y <= usable.size.y):
+		return
+	var size := _fitting_size(usable.size)
+	DisplayServer.window_set_size(size)
+	DisplayServer.window_set_position(usable.position + (usable.size - size) / 2)
+
+
+static func _fitting_size(usable: Vector2i) -> Vector2i:
+	var size := WINDOW_SIZE
+	var limit := Vector2(usable) * 0.92
+	var f := minf(1.0, minf(limit.x / size.x, limit.y / size.y))
+	return Vector2i(roundi(size.x * f), roundi(size.y * f))
 
 
 static func _set_bus(bus: String, linear: float) -> void:

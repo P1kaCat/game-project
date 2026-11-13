@@ -27,6 +27,28 @@ static func fog_texture(w: int, h: int, seed: int, coverage: float, color: Color
 	return ImageTexture.create_from_image(img)
 
 
+## Soft fog: no checkerboard dithering. Noise in 2x2-pixel clusters with a
+## few alpha steps (reads as mist at any screen scale).
+static func soft_fog_texture(w: int, h: int, seed: int, coverage: float, color: Color) -> ImageTexture:
+	var n := FastNoiseLite.new()
+	n.seed = seed
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.frequency = 0.03
+	n.fractal_octaves = 3
+	var src := n.get_seamless_image(w / 2, h / 2, false, false, 0.2)
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in h / 2:
+		var band := sin(PI * (y + 0.5) / (h / 2))
+		for x in w / 2:
+			var t := clampf((src.get_pixel(x, y).r - (1.0 - coverage)) * 2.4, 0.0, 1.0) * band
+			var a := floorf(t * 4.0) / 4.0 * color.a   # 0, 25, 50, 75 % of the colour alpha
+			if a <= 0.0:
+				continue
+			var c := Color(color, a)
+			img.fill_rect(Rect2i(x * 2, y * 2, 2, 2), c)
+	return ImageTexture.create_from_image(img)
+
+
 ## Vertical dithered gradient (transparent -> color), e.g. to fade an
 ## illustration's edge into the background colour.
 static func dither_gradient(w: int, h: int, color: Color, horizontal := false) -> ImageTexture:

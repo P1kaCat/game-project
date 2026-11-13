@@ -24,6 +24,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 BASE_DIRS = ["scripts/launcher"]
 BASE_FILES = ["scenes/launcher.tscn"]
+# Baked into the exe / APK at export time (app icons): a change needs a full update.
+BASE_BINARY = ["icon.png", "assets/branding"]
 
 
 def strip_versions(text: str) -> str:
@@ -48,6 +50,13 @@ def base_id() -> str:
         files.add(m.group(1))
     for rel in sorted(files):
         add(rel, (ROOT / rel).read_text())
+    binaries = []
+    for b in BASE_BINARY:
+        p = ROOT / b
+        binaries += sorted(p.rglob("*")) if p.is_dir() else [p]
+    for p in binaries:
+        if p.is_file() and p.suffix != ".import":
+            h.update(str(p.relative_to(ROOT)).encode() + b"\0" + hashlib.sha256(p.read_bytes()).digest())
     return h.hexdigest()[:16]
 
 
