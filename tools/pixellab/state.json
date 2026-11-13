@@ -221,5 +221,142 @@
       },
       "file": "assets/tiles/terrain/cobblestone.png"
     }
+  },
+  "npcs": {
+    "eldric": {
+      "character_id": "90bed6ad-2c5c-402b-9e28-7822408f14a6",
+      "character_job": "907b1d81-f597-4a3c-864b-43325d4ec850",
+      "character_request": {
+        "description": "full-body friendly fantasy traveling merchant, middle-aged man with realistic proportions, not chibi, warm smile, short brown beard, brown hair tied back, dark forest-green hooded traveling cloak, brown leather vest over cream linen shirt, leather belt with several coin pouches, large leather backpack with a rolled blanket, dark trousers, worn leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting",
+        "name": "eldric",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "high detail"
+      },
+      "animations": {
+        "idle": {
+          "animation_group_id": "99024a8b-d9eb-4137-b05f-5556a5126644",
+          "jobs": {
+            "south": "34f1419e-4b53-4ccb-ba8b-5f9890dfdb65",
+            "south-east": "a80f77f3-fad1-4126-8af8-ab63e69d1f75",
+            "east": "685d30e4-6a9c-49dd-bcce-5c4aaafafb21",
+            "north-east": "e4fab0da-c27b-4a84-a144-8803d546b170",
+            "north": "3e627494-0456-4b7b-b2fa-cfbfbc51c18e",
+            "north-west": "c086e5fe-63f9-49bc-8b23-bb43a49617e2",
+            "west": "f6880c09-71ee-433e-b2ec-d84f1a32ca8f",
+            "south-west": "23290465-ed57-4bae-a0fb-2a1d0098ea9d"
+          },
+          "request": {
+            "animation_name": "idle",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "subtle idle breathing loop: standing still in place, chest gently rises and falls, shoulders lift very slightly, cloak and backpack sway a little, feet stay planted, no stepping, seamless loop",
+            "frame_count": 4,
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        }
+      },
+      "portrait": {
+        "request": {
+          "direction": "character_to_portrait",
+          "view": "low top-down",
+          "result_size": 64
+        },
+        "source_image": "south.png",
+        "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/eldric/portrait_64.png"
+      }
+    }
+  },
+  "icons": {
+    "healing_potion": {
+      "request": {
+        "description": "fantasy RPG inventory icon: small round glass healing potion bottle filled with glowing red liquid, cork stopper, tiny highlight, centered, game item icon",
+        "image_size": {
+          "width": 32,
+          "height": 32
+        },
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "highly detailed"
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/healing_potion.png"
+    },
+    "fresh_bread": {
+      "request": {
+        "description": "fantasy RPG inventory icon: fresh golden-brown loaf of bread with scored crust, centered, game item icon",
+        "image_size": {
+          "width": 32,
+          "height": 32
+        },
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "highly detailed"
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/fresh_bread.png"
+    },
+    "iron_sword": {
+      "request": {
+        "description": "fantasy RPG inventory icon: iron sword diagonal from bottom-left to top-right, steel blade, brown leather grip, simple crossguard, centered, game item icon",
+        "image_size": {
+          "width": 32,
+          "height": 32
+        },
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "highly detailed"
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/iron_sword.png"
+    },
+    "gold_coin": {
+      "request": {
+        "description": "fantasy RPG currency icon: single shiny gold coin with embossed crown, slight perspective, centered, game item icon",
+        "image_size": {
+          "width": 32,
+          "height": 32
+        },
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "highly detailed"
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/gold_coin.png"
+    },
+    "gold_coin_small": {
+      "request": {
+        "description": "tiny gold coin icon, shiny round gold coin, simple, centered, game currency icon",
+        "image_size": {
+          "width": 16,
+          "height": 16
+        },
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "highly detailed"
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/gold_coin_small.png"
+    }
   }
 }

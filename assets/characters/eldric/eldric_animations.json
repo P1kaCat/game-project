@@ -1,0 +1,76 @@
+{
+  "name": "eldric",
+  "source": {
+    "generator": "PixelLab API v2",
+    "character_endpoint": "POST /v2/create-character-v3",
+    "animation_endpoint": "POST /v2/characters/animations",
+    "pixellab_character_id": "90bed6ad-2c5c-402b-9e28-7822408f14a6",
+    "view": "low top-down",
+    "character_canvas": [
+      48,
+      48
+    ],
+    "prompt": "full-body friendly fantasy traveling merchant, middle-aged man with realistic proportions, not chibi, warm smile, short brown beard, brown hair tied back, dark forest-green hooded traveling cloak, brown leather vest over cream linen shirt, leather belt with several coin pouches, large leather backpack with a rolled blanket, dark trousers, worn leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting"
+  },
+  "frame_width": 68,
+  "frame_height": 68,
+  "pivot": {
+    "x": 34,
+    "y": 57,
+    "note": "foot contact point in frame pixels"
+  },
+  "character_body_size_south": [
+    36,
+    46
+  ],
+  "directions": [
+    "n",
+    "ne",
+    "e",
+    "se",
+    "s",
+    "sw",
+    "w",
+    "nw"
+  ],
+  "direction_names": {
+    "n": "north",
+    "ne": "north-east",
+    "e": "east",
+    "se": "south-east",
+    "s": "south",
+    "sw": "south-west",
+    "w": "west",
+    "nw": "north-west"
+  },
+  "sheet_layout": "rows = directions in 'directions' order, columns = frames, no spacing",
+  "animations": {
+    "idle": {
+      "sheet": "spritesheets/eldric_idle.png",
+      "frames": 4,
+      "frame_duration_ms": 200,
+      "fps": 5.0,
+      "loop": true,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "idle/<direction>/frame_NN.png"
+    }
+  },
+  "filtering": "nearest",
+  "portrait": {
+    "file": "portrait.png",
+    "size": [
+      64,
+      64
+    ],
+    "source": "POST /v2/portrait-character-pro (character_to_portrait, from rotations/s)"
+  }
+}

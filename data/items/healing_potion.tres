@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/items/healing_potion.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"healing_potion"
+display_name = "Potion de soin"
+description = "Une fiole de liquide rouge et chaud. Referme les petites blessures et redonne du courage."
+icon = ExtResource("2_icon")
+category = &"consumable"
+max_stack = 10
+purchasable = true

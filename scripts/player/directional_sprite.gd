@@ -22,6 +22,15 @@ func _ready() -> void:
 	play_state("idle", Direction8.S)
 
 
+## Re-reads `metadata_path` (e.g. after an NPC assigns its own sprite sheet).
+func reload() -> void:
+	var state := current_state if current_state != "" else "idle"
+	var dir := current_dir
+	current_state = ""
+	_load_metadata()
+	play_state(state, dir)
+
+
 func _load_metadata() -> void:
 	var text := FileAccess.get_file_as_string(metadata_path)
 	_meta = JSON.parse_string(text)

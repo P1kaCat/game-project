@@ -43,6 +43,12 @@ signal interacted
 
 @onready var sprite: DirectionalSprite = $Sprite
 @onready var emote: Node2D = $Emote
+@onready var interactor: PlayerInteractor = $Interactor
+
+## Gold + inventory (local mirror; server-authoritative later, see TradeService).
+var state := PlayerState.new(250, 20)
+## > 0 while a conversation / shop is open: movement input is ignored.
+var _lock_count := 0
 
 var facing := Direction8.S
 ## Current ground-space velocity (undistorted), useful for debugging/tests.
@@ -56,9 +62,9 @@ var _pending_time := 0.0
 
 
 func _physics_process(delta: float) -> void:
-	var input := GameInput.get_move_vector()
+	var input := GameInput.get_move_vector() if _lock_count == 0 else Vector2.ZERO
 	var strength := minf(input.length(), 1.0)
-	is_running = strength > 0.0 and GameInput.is_run_requested()
+	is_running = strength > 0.0 and _lock_count == 0 and GameInput.is_run_requested()
 
 	var target := Vector2.ZERO
 	if strength > 0.0:
@@ -100,14 +106,36 @@ func _resolve_collision(start: Vector2, delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"interact"):
+	if event.is_action_pressed(&"interact") and _lock_count == 0:
+		# The key that starts a conversation must not also confirm its first line.
+		get_viewport().set_input_as_handled()
 		interact()
 
 
-## Placeholder for future interactions (talk, open, pick up...).
+## Talks to / uses the nearest Interactable in range; otherwise a small "!".
 func interact() -> void:
-	emote.call(&"pop")
+	if not interactor.try_interact():
+		emote.call(&"pop")
 	interacted.emit()
+
+
+func set_controls_locked(locked: bool) -> void:
+	_lock_count = maxi(0, _lock_count + (1 if locked else -1))
+	interactor.enabled = _lock_count == 0
+	if _lock_count > 0:
+		ground_velocity = Vector2.ZERO
+
+
+func is_controls_locked() -> bool:
+	return _lock_count > 0
+
+
+## Turns (idle) towards a world position, e.g. the NPC being talked to.
+func face_towards(world_pos: Vector2) -> void:
+	var d := Iso.screen_to_ground(world_pos - global_position)
+	if d.length() > 0.5:
+		_set_facing(Direction8.sector_of_vector(d))
+		sprite.play_state("idle", facing)
 
 
 func _update_facing(sector: int, delta: float) -> void:

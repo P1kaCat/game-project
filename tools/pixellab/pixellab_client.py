@@ -15,7 +15,13 @@ Bearer token and never written to disk or logs. (In environments where an
 HTTPS proxy injects the credential, the variable may be left unset.)
 
 State (character id, animation group ids, job ids) is kept in state.json next to
-this script so generated references are reused instead of regenerated.
+this script so generated references are reused instead of regenerated. The
+player lives at the top level of state.json; other characters (NPCs) under
+state["npcs"][KEY], selected with the global option --npc KEY.
+
+Also used:
+  POST /portrait-character-pro         character sprite -> detailed bust portrait
+  POST /create-image-pixen             small transparent images (item icons)
 """
 from __future__ import annotations
 
@@ -67,6 +73,11 @@ def save_state(state: dict) -> None:
     STATE_FILE.write_text(json.dumps(state, indent=2) + "\n")
 
 
+def scope(state: dict, npc: str | None) -> dict:
+    """The state dict of the selected character (player = top level)."""
+    return state if not npc else state.setdefault("npcs", {}).setdefault(npc, {})
+
+
 def poll_job(job_id: str, interval: float = 8.0, timeout: float = 1800.0) -> dict:
     start = time.time()
     while True:
@@ -88,7 +99,8 @@ def cmd_balance(_args):
 
 
 def cmd_create_character(args):
-    state = load_state()
+    root = load_state()
+    state = scope(root, args.npc)
     if state.get("character_id") and not args.force:
         raise SystemExit(f"Character already exists ({state['character_id']}); pass --force to create another.")
     body = {
@@ -110,7 +122,7 @@ def cmd_create_character(args):
         "character_job": resp["background_job_id"],
         "character_request": body,
     })
-    save_state(state)
+    save_state(root)
     job = poll_job(resp["background_job_id"])
     print("character job:", job["status"], json.dumps(job.get("usage")))
     if job["status"] != "completed":
@@ -118,12 +130,13 @@ def cmd_create_character(args):
 
 
 def cmd_character(args):
-    cid = args.character_id or load_state().get("character_id")
+    cid = args.character_id or scope(load_state(), args.npc).get("character_id")
     print(json.dumps(_request("GET", f"/characters/{cid}"), indent=2))
 
 
 def cmd_animate(args):
-    state = load_state()
+    root = load_state()
+    state = scope(root, args.npc)
     cid = state["character_id"]
     anims = state.setdefault("animations", {})
     entry = anims.setdefault(args.key, {})
@@ -150,13 +163,14 @@ def cmd_animate(args):
     entry["animation_group_id"] = resp.get("animation_group_id")
     entry.setdefault("jobs", {}).update(dict(zip(resp["directions"], resp["background_job_ids"])))
     entry["request"] = {k: v for k, v in body.items() if k != "character_id"}
-    save_state(state)
+    save_state(root)
     if args.wait:
-        wait_animation(args.key)
+        wait_animation(args.key, args.npc)
 
 
-def wait_animation(key: str):
-    state = load_state()
+def wait_animation(key: str, npc: str | None = None):
+    root = load_state()
+    state = scope(root, npc)
     jobs = state["animations"][key]["jobs"]
     results = {}
     for direction, job_id in jobs.items():
@@ -166,15 +180,15 @@ def wait_animation(key: str):
         if job["status"] == "failed":
             print(json.dumps(job.get("last_response"), indent=2)[:2000])
     state["animations"][key]["status"] = results
-    save_state(state)
+    save_state(root)
 
 
 def cmd_wait(args):
-    wait_animation(args.key)
+    wait_animation(args.key, args.npc)
 
 
 def cmd_zip(args):
-    cid = load_state()["character_id"]
+    cid = scope(load_state(), args.npc)["character_id"]
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_bytes(_request("GET", f"/characters/{cid}/zip", raw=True))
@@ -214,8 +228,53 @@ def cmd_iso_tile(args):
     print(f"wrote {out}")
 
 
+def cmd_portrait(args):
+    """Character sprite (south-facing PNG) -> bust portrait (same identity)."""
+    import base64
+    root = load_state()
+    state = scope(root, args.npc)
+    b64 = base64.b64encode(Path(args.image).read_bytes()).decode()
+    body = {"direction": "character_to_portrait", "image": {"type": "base64", "base64": b64},
+            "view": args.view, "result_size": args.size}
+    resp = _request("POST", "/portrait-character-pro", body)
+    job = poll_job(resp["background_job_id"], interval=5)
+    print("portrait job:", job["status"], json.dumps(job.get("usage")))
+    if job["status"] != "completed":
+        raise SystemExit(json.dumps(job, indent=2)[:3000])
+    img = (job.get("last_response") or {}).get("images", [None])[0]
+    data = img.get("base64") if isinstance(img, dict) else img
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(base64.b64decode(data.split(",")[-1]))
+    state["portrait"] = {"request": {k: v for k, v in body.items() if k != "image"},
+                         "source_image": args.image.split("/")[-1], "file": str(out)}
+    save_state(root)
+    print(f"wrote {out}")
+
+
+def cmd_icon(args):
+    """Small transparent pixel-art image (item icon) via the Pixen model."""
+    import base64
+    root = load_state()
+    body = {"description": args.description, "image_size": {"width": args.size, "height": args.size},
+            "no_background": True, "outline": args.outline, "detail": args.detail}
+    if args.view:
+        body["view"] = args.view
+    if args.seed is not None:
+        body["seed"] = args.seed
+    resp = _request("POST", "/create-image-pixen", body)
+    print("icon usage:", json.dumps(resp.get("usage")))
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(base64.b64decode(resp["image"]["base64"].split(",")[-1]))
+    root.setdefault("icons", {})[args.key] = {"request": body, "file": str(out)}
+    save_state(root)
+    print(f"wrote {out}")
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--npc", help="operate on state['npcs'][NPC] instead of the player")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("balance").set_defaults(func=cmd_balance)
@@ -266,6 +325,24 @@ def main(argv=None):
     t.add_argument("--detail", default="highly detailed")
     t.add_argument("--seed", type=int)
     t.set_defaults(func=cmd_iso_tile)
+
+    pt = sub.add_parser("portrait")
+    pt.add_argument("--image", required=True, help="south-facing character PNG")
+    pt.add_argument("--out", required=True)
+    pt.add_argument("--size", type=int, default=64, choices=[16, 32, 48, 64, 128, 160])
+    pt.add_argument("--view", default="low top-down")
+    pt.set_defaults(func=cmd_portrait)
+
+    ic = sub.add_parser("icon")
+    ic.add_argument("--key", required=True)
+    ic.add_argument("--description", required=True)
+    ic.add_argument("--out", required=True)
+    ic.add_argument("--size", type=int, default=32)
+    ic.add_argument("--outline", default="single color black outline")
+    ic.add_argument("--detail", default="highly detailed")
+    ic.add_argument("--view")
+    ic.add_argument("--seed", type=int)
+    ic.set_defaults(func=cmd_icon)
 
     args = p.parse_args(argv)
     args.func(args)

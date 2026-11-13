@@ -21,22 +21,23 @@ extends CanvasLayer
 @onready var sprint_button: TouchActionButton = $Root/SprintButton
 
 var safe_rect := Rect2()  # in viewport coordinates, for tests/debug
-var _fake_insets := Vector4.ZERO
 
 
 func _ready() -> void:
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--fake-safe-area="):
-			var p := arg.trim_prefix("--fake-safe-area=").split(",")
-			if p.size() == 4:
-				_fake_insets = Vector4(p[0].to_float(), p[1].to_float(), p[2].to_float(), p[3].to_float())
 	get_viewport().size_changed.connect(_layout)
 	GameInput.touch_ui_changed.connect(_on_touch_ui_changed)
 	_on_touch_ui_changed(GameInput.touch_ui_enabled)
 
 
+## Hidden while dialogue / shop windows are open (movement is locked anyway).
+var suppressed := false:
+	set(v):
+		suppressed = v
+		_on_touch_ui_changed(GameInput.touch_ui_enabled)
+
+
 func _on_touch_ui_changed(enabled: bool) -> void:
-	visible = enabled
+	visible = enabled and not suppressed
 	if enabled:
 		_layout.call_deferred()
 	else:
@@ -45,28 +46,13 @@ func _on_touch_ui_changed(enabled: bool) -> void:
 
 ## Window-pixels-per-viewport-pixel and letterbox offset of the stretched root.
 func _stretch() -> Array:
+	var s := SafeArea.pixel_scale(get_viewport())
 	var win := Vector2(DisplayServer.window_get_size())
-	var vp := get_viewport().get_visible_rect().size
-	var s := minf(win.x / vp.x, win.y / vp.y)
-	if ProjectSettings.get_setting("display/window/stretch/scale_mode") == "integer":
-		s = maxf(1.0, roundf(s))
-	return [s, (win - vp * s) / 2.0]
+	return [s, (win - get_viewport().get_visible_rect().size * s) / 2.0]
 
 
 func _compute_safe_rect() -> Rect2:
-	var vp_rect := get_viewport().get_visible_rect()
-	var st := _stretch()
-	var s: float = st[0]
-	var off: Vector2 = st[1]
-	var safe := Rect2(DisplayServer.get_display_safe_area())
-	safe.position -= Vector2(DisplayServer.window_get_position())
-	if _fake_insets != Vector4.ZERO:
-		var win := Vector2(DisplayServer.window_get_size())
-		safe = Rect2(_fake_insets.x, _fake_insets.y,
-			win.x - _fake_insets.x - _fake_insets.z, win.y - _fake_insets.y - _fake_insets.w)
-	var r := Rect2((safe.position - off) / s, safe.size / s)
-	r = r.intersection(vp_rect)
-	return r if r.has_area() else vp_rect
+	return SafeArea.viewport_rect(get_viewport())
 
 
 func _layout() -> void:

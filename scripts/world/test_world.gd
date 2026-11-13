@@ -11,11 +11,17 @@ extends Node2D
 @onready var player: Player = $Entities/Player
 @onready var camera: FollowCamera = $Camera
 @onready var hud: MobileHUD = $MobileHUD
+@onready var eldric: Npc = $Entities/Eldric
+@onready var director: InteractionDirector = $InteractionDirector
+
+## Eldric stands on the plaza next to the central crossroads.
+const ELDRIC_CELL := Vector2i(10, 7)
 
 
 func _ready() -> void:
 	terrain.build_test_map(map_size)
 	obstacles.build_test_blocks()
+	eldric.global_position = terrain.cell_center(ELDRIC_CELL)
 	spawn_player(Vector2i(map_size / 2, map_size / 2))
 
 	_add_version_label()
@@ -41,7 +47,7 @@ func _add_version_label() -> void:
 		var info = JSON.parse_string(FileAccess.get_file_as_string("res://build_info.json"))
 		v = str(info.get("version", "?")) if info is Dictionary else "?"
 	var layer := CanvasLayer.new()
-	layer.layer = 40
+	layer.layer = 5  # under the HUD (10) and the dialogue / shop windows (30+)
 	var label := Label.new()
 	label.name = "VersionLabel"
 	label.text = "v" + v

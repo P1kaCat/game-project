@@ -62,6 +62,60 @@ adb install -r build/android/IsoRPG-debug.apk
 A store/release build would additionally need a private release keystore
 (`keystore/release*` in the preset, or `GODOT_ANDROID_KEYSTORE_RELEASE_*` env vars).
 
+## NPCs, dialogue and shop
+
+Eldric, the first NPC, stands next to the central crossroads. Walk up to him:
+a small speech bubble appears; press **E** (PC) or the **A** button (Android).
+
+| | PC | Android |
+|---|---|---|
+| Talk | E | A button |
+| Confirm / next line | Enter, Space, E, click on the box | tap the box |
+| Choices | arrow keys + Enter, mouse | tap |
+| Cancel / close | Escape | "Non merci" / "Fermer" |
+| Shop | arrows, Enter on an item (or "Acheter"), Escape | tap an item, tap again or "Acheter"; drag to scroll |
+
+Text appears with a typewriter effect; confirm once to show the whole line,
+again to continue. Double confirmations are filtered (grace period after
+opening, minimum delay between inputs, choices armed after they appear).
+While a conversation or the shop is open, movement is locked, the touch
+movement controls are hidden and the camera frames both characters in the
+part of the screen the windows leave free.
+
+**Architecture** (each layer independent; only the director knows them all)
+
+| Layer | Files |
+|---|---|
+| Data | `data/items/*.tres` (ItemDefinition), `data/shops/*.tres` (MerchantStock), `data/dialogues/*.json`, `data/npcs/*.tres` (NpcDefinition) |
+| Model | `scripts/inventory/` Inventory, PlayerState (gold + inventory, serializable) |
+| Rules | `scripts/trade/trade_service.gd`: `request_purchase()` validates (item exists, sold here, stock, gold, inventory space) and applies atomically; returns a result code |
+| Logic | `scripts/dialogue/` DialogueData (loader/validator), DialogueManager (graph runner, flags, actions) |
+| World | `scripts/npc/npc.gd`, `scripts/interaction/` Interactable + PlayerInteractor |
+| Views | `scripts/ui/dialogue_ui.gd`, `shop_ui.gd`, `ui_theme.gd` (pixel-art 9-slice frames from `tools/ui/make_ui_art.py`), `safe_area.gd` |
+| Glue | `scripts/world/interaction_director.gd` |
+
+The shop UI never edits gold or inventory: it asks `TradeService` and shows
+the result. For a multiplayer server, a networked TradeService keeps the same
+`request_purchase` coroutine, the server runs `validate_and_apply` on its
+authoritative PlayerState and the client applies the returned state with
+`PlayerState.apply_dict()`.
+
+**Dialogue format** (`data/dialogues/eldric_merchant.json`): nodes with
+`text`, `choices` (`text`, `next`, optional `condition` on a flag, `cancel`),
+`actions` (e.g. `{"type": "open_shop"}`), `set_flags`, `next` (`"end"` closes).
+A line followed by a choices-only node shows the choices under that line.
+Flags persist between conversations, ready for quests.
+
+**Adding an NPC**: generate it (`pixellab_client.py --npc NAME create-character /
+animate / zip / portrait`, then `tools/pixellab/export_npc.py`), write
+`data/npcs/NAME.tres` + a dialogue JSON (+ optional shop `.tres`), and place a
+`scenes/npc.tscn` instance with that definition. No code changes.
+
+**Generated with PixelLab for this milestone** (30 generations): Eldric with 8
+rotations (`create-character-v3`, 2), idle x 8 directions (`characters/animations`
+pixminimax, 8), dialogue portrait from his own sprite (`portrait-character-pro`
+character_to_portrait, 15), item and coin icons (`create-image-pixen`, 5).
+
 ## Updates (launcher + GitHub Releases)
 
 The exe / APK start on a small **launcher** (`scenes/launcher.tscn`) that
@@ -120,7 +174,7 @@ godot --path . --resolution 2400x1080 -- --autotest --layout-only --fake-safe-ar
 `scripts/debug/autotest.gd` drives the real game. The keyboard path goes
 through the InputMap actions. The touch path injects `InputEventScreenTouch` /
 `InputEventScreenDrag` events in window pixels, exactly as Android delivers
-them. It runs 87 checks, including:
+them. It runs 164 checks (movement, touch, launcher, NPC/dialogue/shop), including:
 - 8 directions by keyboard and by joystick: sprite, animation, normalised
   speed, iso screen direction
 - idle/walk/run transitions, no per-frame animation restarts, last facing kept
@@ -219,7 +273,7 @@ scripts/ui/touch_action_button.gd     round touch button -> InputMap action ("in
 scripts/ui/mobile_hud.gd              HUD visibility, density-aware sizing, safe-area layout
 scripts/launcher/launcher.gd          entry scene: update check, pack hot-load, full update
 scripts/launcher/update_service.gd    GitHub Releases client, download, exe swap
-scripts/debug/autotest.gd             scripted runtime verification
+scripts/debug/autotest.gd             scripted runtime verification (+ autotest_npc.gd)
 ```
 
 **Extending:** new input sources only touch `GameInput`. A new on-screen

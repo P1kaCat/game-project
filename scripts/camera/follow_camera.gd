@@ -17,6 +17,8 @@ extends Camera2D
 @export var focus_offset := Vector2(0, -20)
 
 var _smoothed := Vector2.ZERO
+var _frame_points: Array[Vector2] = []
+var _frame_anchor := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -34,10 +36,31 @@ func snap_to_target() -> void:
 	reset_physics_interpolation()
 
 
+## Frames world points (e.g. player + NPC during a conversation) so that their
+## midpoint appears at `screen_anchor` (viewport pixels). Smoothly animated.
+func frame_points(points: Array[Vector2], screen_anchor: Vector2) -> void:
+	_frame_points = points
+	_frame_anchor = screen_anchor
+
+
+func clear_framing() -> void:
+	_frame_points = []
+
+
+func is_framing() -> bool:
+	return not _frame_points.is_empty()
+
+
 func _physics_process(delta: float) -> void:
 	if target == null:
 		return
 	var goal := target.global_position + focus_offset
+	if not _frame_points.is_empty():
+		var mid := Vector2.ZERO
+		for p in _frame_points:
+			mid += p
+		mid /= _frame_points.size()
+		goal = mid + get_viewport_rect().size / 2.0 - _frame_anchor
 	_smoothed = _smoothed.lerp(goal, 1.0 - exp(-follow_speed * delta))
 	# Keep (target - camera) integral -> stable sprite, smooth world scroll.
 	global_position = goal - (goal - _smoothed).round()

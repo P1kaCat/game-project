@@ -1,0 +1,32 @@
+{
+  "id": "eldric_merchant",
+  "speaker": "eldric",
+  "start": "greet",
+  "nodes": {
+    "greet": {
+      "text": "Bienvenue, voyageur ! Tu tombes bien, j'ai quelques marchandises qui pourraient t'intéresser.",
+      "next": "menu"
+    },
+    "menu": {
+      "choices": [
+        { "text": "Montre-moi tes marchandises.", "next": "shop" },
+        { "text": "Qui es-tu ?", "next": "who" },
+        { "text": "Non merci.", "next": "bye", "cancel": true }
+      ]
+    },
+    "shop": {
+      "text": "Avec plaisir ! Prends ton temps.",
+      "actions": [ { "type": "open_shop", "shop": "eldric" } ],
+      "next": "end"
+    },
+    "who": {
+      "text": "Je m'appelle Eldric. Je voyage de village en village pour vendre mes trouvailles.",
+      "set_flags": { "met_eldric": true },
+      "next": "menu"
+    },
+    "bye": {
+      "text": "À bientôt, voyageur !",
+      "next": "end"
+    }
+  }
+}

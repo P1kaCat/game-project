@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemDefinition" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/items/item_definition.gd" id="1_def"]
+[ext_resource type="Texture2D" path="res://assets/items/iron_sword.png" id="2_icon"]
+
+[resource]
+script = ExtResource("1_def")
+id = &"iron_sword"
+display_name = "Épée en fer"
+description = "Une lame solide forgée dans un bon fer. Simple, fiable, bien équilibrée."
+icon = ExtResource("2_icon")
+category = &"weapon"
+max_stack = 1
+purchasable = true

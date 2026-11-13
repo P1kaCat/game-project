@@ -53,6 +53,18 @@ func _physics_process(_delta: float) -> void:
 # --------------------------------------------------------------------- runner
 func _run() -> void:
 	await _wait(0.4)
+	if "--npc-only" in OS.get_cmdline_user_args():
+		var npc_tests = preload("res://scripts/debug/autotest_npc.gd").new(self)
+		await npc_tests.run()
+		check("npc suite ran to completion (no script error)", npc_tests.completed)
+		print("SUMMARY %s (%d checks, %d failures)" % ["PASS" if _failures == 0 else "FAIL", _checks, _failures])
+		get_tree().quit(1 if _failures else 0)
+		return
+	if "--npc-layout" in OS.get_cmdline_user_args():
+		await preload("res://scripts/debug/autotest_npc.gd").new(self).run_layout_only()
+		print("SUMMARY %s (%d checks, %d failures)" % ["PASS" if _failures == 0 else "FAIL", _checks, _failures])
+		get_tree().quit(1 if _failures else 0)
+		return
 	if "--launcher-only" in OS.get_cmdline_user_args():
 		await _run_launcher_checks()
 		print("SUMMARY %s (%d checks, %d failures)" % ["PASS" if _failures == 0 else "FAIL", _checks, _failures])
@@ -93,6 +105,11 @@ func _run() -> void:
 	await _test_flicker_resistance()
 	await _test_keyboard_and_touch_coexist()
 	await _test_assets_preserved()
+	# ---- NPC, dialogue, shop (scripts/debug/autotest_npc.gd)
+	GameInput.touch_ui_enabled = false
+	var npc_suite = preload("res://scripts/debug/autotest_npc.gd").new(self)
+	await npc_suite.run()
+	check("npc suite ran to completion (no script error)", npc_suite.completed)
 
 	print("SUMMARY %s (%d checks, %d failures)" % ["PASS" if _failures == 0 else "FAIL", _checks, _failures])
 	get_tree().quit(1 if _failures else 0)
@@ -661,5 +678,7 @@ func _touch_up(index: int, vp_pos: Vector2) -> void:
 
 
 func _capture(name: String) -> void:
+	if _shots_dir == "":
+		return
 	var img := get_viewport().get_texture().get_image()
 	img.save_png("%s/%s.png" % [_shots_dir, name])

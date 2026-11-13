@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/world/test_world.gd" id="1_world"]
 [ext_resource type="Script" path="res://scripts/world/iso_terrain.gd" id="2_terrain"]
@@ -6,6 +6,9 @@
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="4_player"]
 [ext_resource type="Script" path="res://scripts/camera/follow_camera.gd" id="5_camera"]
 [ext_resource type="PackedScene" path="res://scenes/ui/mobile_hud.tscn" id="6_hud"]
+[ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="7_npc"]
+[ext_resource type="Resource" path="res://data/npcs/eldric.tres" id="8_eldric"]
+[ext_resource type="Script" path="res://scripts/world/interaction_director.gd" id="9_director"]
 
 [node name="TestWorld" type="Node2D"]
 script = ExtResource("1_world")
@@ -24,8 +27,17 @@ script = ExtResource("3_obstacles")
 
 [node name="Player" parent="Entities" instance=ExtResource("4_player")]
 
+[node name="Eldric" parent="Entities" instance=ExtResource("7_npc")]
+definition = ExtResource("8_eldric")
+
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("5_camera")
 target = NodePath("../Entities/Player")
 
 [node name="MobileHUD" parent="." instance=ExtResource("6_hud")]
+
+[node name="InteractionDirector" type="Node" parent="." node_paths=PackedStringArray("player", "camera", "hud")]
+script = ExtResource("9_director")
+player = NodePath("../Entities/Player")
+camera = NodePath("../Camera")
+hud = NodePath("../MobileHUD")

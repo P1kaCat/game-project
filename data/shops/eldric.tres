@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MerchantStock" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/trade/merchant_stock.gd" id="1_stock"]
+
+[resource]
+script = ExtResource("1_stock")
+id = &"eldric"
+merchant_name = "Eldric le marchand"
+entries = Array[Dictionary]([{
+"item": &"healing_potion",
+"price": 25,
+"stock": -1
+}, {
+"item": &"fresh_bread",
+"price": 10,
+"stock": -1
+}, {
+"item": &"iron_sword",
+"price": 120,
+"stock": -1
+}])
