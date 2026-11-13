@@ -179,11 +179,22 @@ func _test_run() -> void:
 	await _wait(0.4)
 	var anim := String(player.sprite.animation)
 	var speed := player.ground_velocity.length()
+	var run_scale := player.sprite.speed_scale
 	if _shots_dir != "":
 		_capture("run_w")
 	_release([&"move_left", &"run"])
 	check("run: run anim + run speed", anim == "run_w" and absf(speed - player.run_speed) < 0.01,
 		"%s %.2f px/s" % [anim, speed])
+	var expect_run_scale := player.run_speed / player.run_anim_reference_speed
+	check("run: cycle sped up to match speed (no foot sliding)", absf(run_scale - expect_run_scale) < 0.01,
+		"speed_scale %.2f (expected %.2f)" % [run_scale, expect_run_scale])
+	_press([&"move_left"])
+	await _wait(0.4)
+	var walk_scale := player.sprite.speed_scale
+	_release([&"move_left"])
+	var expect_walk_scale := player.walk_speed / player.walk_anim_reference_speed
+	check("walk: cycle sped up to match speed (no foot sliding)", absf(walk_scale - expect_walk_scale) < 0.01,
+		"speed_scale %.2f (expected %.2f)" % [walk_scale, expect_walk_scale])
 	await _wait(0.3)
 
 

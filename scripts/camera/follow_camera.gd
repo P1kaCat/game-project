@@ -11,7 +11,7 @@ extends Camera2D
 
 @export var target: Node2D
 ## Higher = tighter follow. ~8 gives a few pixels of lag at walking speed.
-@export var follow_speed := 8.0
+@export var follow_speed := 10.0
 ## Offset from the target's foot point to the point kept centred (the
 ## character's torso, so the body sits in the middle of the screen).
 @export var focus_offset := Vector2(0, -20)

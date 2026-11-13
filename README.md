@@ -43,7 +43,7 @@ adb install -r build/android/IsoRPG-debug.apk
 | | Android preset | Windows preset |
 |---|---|---|
 | Output | debug APK, signed with the Android debug key (v2 + v3) | single `.exe`, game data embedded |
-| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.3.0 (code 3) | Iso RPG |
+| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.3.1 (code 4) | Iso RPG |
 | CPU | **arm64-v8a** only | x86_64 |
 | Orientation | landscape (`userLandscape`), immersive, edge-to-edge (safe area handled in-game) | 1440 × 810 window, resizable |
 | Permissions | **none** | n/a |
@@ -112,7 +112,7 @@ against the map outline and raised blocks; a blocked push that would only
 jitter (head-on or in an inside corner) stops cleanly instead.
 `Iso.ground_to_screen()` halves the vertical component (the 2:1 camera). This
 keeps diagonal speed normalised in ground space, and moving diagonally
-travels exactly along the tile edges, slope (2, 1). Speeds (walk 50 px/s,
+travels exactly along the tile edges, slope (2, 1). Speeds (walk 65 px/s, run 150 px/s; animation sped up to match from the stride-calibrated 50 / 90 px/s,
 run 90 px/s) were calibrated against the stride measured in the generated
 frames, so the feet don't slide.
 

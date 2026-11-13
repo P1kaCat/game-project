@@ -13,10 +13,15 @@ extends CharacterBody2D
 signal facing_changed(dir_code: String)
 signal interacted
 
-## Ground-space speeds in px/s, calibrated against the stride in the generated
-## frames so the feet don't slide.
-@export var walk_speed := 50.0
-@export var run_speed := 90.0
+## Ground-space movement speeds in px/s.
+@export var walk_speed := 65.0
+@export var run_speed := 150.0
+## Speeds at which the PixelLab walk / run cycles play at their native frame
+## rate without foot sliding (measured from the stride in the frames). The
+## animation is sped up by speed / reference, so faster movement keeps the
+## feet planted instead of sliding.
+@export var walk_anim_reference_speed := 50.0
+@export var run_anim_reference_speed := 90.0
 ## Ground-space acceleration / braking in px/s². High values feel responsive;
 ## the short ramp only removes the 1-frame start/stop pop.
 @export var acceleration := 1400.0
@@ -134,7 +139,7 @@ func _update_animation(_target: Vector2) -> void:
 		sprite.play_state("idle", facing)
 		return
 	var state := "run" if is_running and sprite.has_state("run") else "walk"
-	var nominal := run_speed if state == "run" else walk_speed
+	var reference := run_anim_reference_speed if state == "run" else walk_anim_reference_speed
 	# Tie the cycle to actual speed (analog input, acceleration, wall sliding).
-	sprite.speed_scale = clampf(speed / nominal, 0.35, 1.0)
+	sprite.speed_scale = clampf(speed / reference, 0.35, 2.5)
 	sprite.play_state(state, facing)
