@@ -16,7 +16,8 @@ extends Control
 ## 4. Starts the game (scenes/main.tscn). Any network problem -> just plays.
 ##
 ## Command-line (after `--`), mainly for tests: --check-updates (check in
-## non-exported runs), --no-update-check, --update-api-base=URL,
+## non-exported runs), --no-update-check, --update-base-url=URL (instead of
+## https://github.com),
 ## --update-platform=windows|android, --update-exe-path=PATH, --no-restart.
 
 const GAME_SCENE := "res://scenes/main.tscn"
@@ -57,8 +58,8 @@ func _ready() -> void:
 			check = true
 		elif arg == "--no-update-check":
 			check = false
-		elif arg.begins_with("--update-api-base="):
-			_service.api_base = arg.trim_prefix("--update-api-base=").trim_suffix("/")
+		elif arg.begins_with("--update-base-url="):
+			_service.web_base = arg.trim_prefix("--update-base-url=").trim_suffix("/")
 		elif arg.begins_with("--update-platform="):
 			_platform = arg.trim_prefix("--update-platform=")
 		elif arg.begins_with("--update-exe-path="):
@@ -137,9 +138,7 @@ func _check_online() -> void:
 		print("[Launcher] up to date (v%s, latest v%s)" % [content_version, rel.version])
 		return
 
-	var manifest := {}
-	if rel.assets.has("manifest.json"):
-		manifest = await _service.fetch_json(rel.assets["manifest.json"].url)
+	var manifest: Dictionary = rel.manifest
 	var key := "android" if _platform == "android" else "windows"
 	var pack_info: Dictionary = manifest.get("packs", {}).get(key, {})
 	if manifest.get("base_id", "") == base_id and not pack_info.is_empty() \

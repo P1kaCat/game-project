@@ -13,34 +13,43 @@ extends Node
 const REPO := "P1kaCat/game-project"
 const USER_AGENT := "IsoRPG-launcher"
 
-var api_base := "https://api.github.com"
+## Root of the GitHub website. Releases are read through its public download
+## links (served by GitHub's CDN), NOT through api.github.com: the anonymous
+## API is limited to 60 requests/hour per IP, which shared IPs (mobile
+## carriers, offices, cloud machines) exhaust quickly.
+var web_base := "https://github.com"
 
 var _active: HTTPRequest
 var _expected_size := 0
 
 
-## Latest release as {version, page_url, assets: {name: {url, size}}}, or {} on error.
-func fetch_latest_release(timeout := 8.0) -> Dictionary:
-	var res := await _http_get("%s/repos/%s/releases/latest" % [api_base, REPO], timeout,
-		["Accept: application/vnd.github+json"])
-	if res.is_empty():
+## Latest release as {version, page_url, manifest, assets: {name: {url, size}}},
+## or {} on error. Reads releases/latest/download/manifest.json, which already
+## holds the version, base_id and pack checksums; asset URLs follow from the
+## version tag.
+func fetch_latest_release(timeout := 10.0) -> Dictionary:
+	var manifest := await fetch_json("%s/%s/releases/latest/download/manifest.json" % [web_base, REPO], timeout)
+	if not manifest.has("version"):
 		return {}
-	var data = JSON.parse_string(res.body.get_string_from_utf8())
-	if typeof(data) != TYPE_DICTIONARY or not data.has("tag_name"):
-		return {}
+	var version := str(manifest.version)
+	var dl := "%s/%s/releases/download/v%s/" % [web_base, REPO, version]
 	var assets := {}
-	for a in data.get("assets", []):
-		assets[str(a.get("name", ""))] = {"url": str(a.get("browser_download_url", "")), "size": int(a.get("size", 0))}
+	for name in ["manifest.json", "IsoRPG-windows.zip", "IsoRPG.apk"]:
+		assets[name] = {"url": dl + name, "size": 0}
+	for key in manifest.get("packs", {}):
+		var p: Dictionary = manifest.packs[key]
+		assets[str(p.get("name", ""))] = {"url": dl + str(p.get("name", "")), "size": int(p.get("size", 0))}
 	return {
-		"version": str(data.tag_name).trim_prefix("v").trim_prefix("V"),
-		"page_url": str(data.get("html_url", "https://github.com/%s/releases/latest" % REPO)),
+		"version": version,
+		"page_url": "%s/%s/releases/tag/v%s" % [web_base, REPO, version],
+		"manifest": manifest,
 		"assets": assets,
 	}
 
 
 ## Small JSON asset (the manifest). {} on error.
 func fetch_json(url: String, timeout := 10.0) -> Dictionary:
-	var res := await _http_get(url, timeout)
+	var res := await _http_get(url, timeout, ["Accept: application/json"])
 	if res.is_empty():
 		return {}
 	var data = JSON.parse_string(res.body.get_string_from_utf8())

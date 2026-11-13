@@ -65,7 +65,10 @@ A store/release build would additionally need a private release keystore
 ## Updates (launcher + GitHub Releases)
 
 The exe / APK start on a small **launcher** (`scenes/launcher.tscn`) that
-checks the latest GitHub Release before the game starts:
+checks the latest GitHub Release before the game starts. It reads
+`github.com/<repo>/releases/latest/download/manifest.json` (GitHub's CDN) and
+never calls `api.github.com`, whose anonymous limit (60 requests/hour per IP)
+is easily exhausted on shared IPs:
 
 | Release changes… | What the launcher does |
 |---|---|
@@ -99,9 +102,10 @@ with `tools/release/build.sh` and publishes `manifest.json`,
    the previous one. Never commit the keystore (`*.keystore` is git-ignored).
 
 **Testing the launcher** (no GitHub needed): serve a fake
-`/repos/P1kaCat/game-project/releases/latest` and run
+`/P1kaCat/game-project/releases/latest/download/manifest.json` and
+`/P1kaCat/game-project/releases/download/vX.Y.Z/<files>`, then run
 `godot --main-pack IsoRPG.exe -- --autotest --launcher-only --check-updates
---update-api-base=http://127.0.0.1:PORT --update-platform=windows
+--update-base-url=http://127.0.0.1:PORT --update-platform=windows
 --expect-launcher=updated --expect-content-version=X.Y.Z`.
 
 ## Testing
