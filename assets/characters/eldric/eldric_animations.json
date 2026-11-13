@@ -4,23 +4,23 @@
     "generator": "PixelLab API v2",
     "character_endpoint": "POST /v2/create-character-v3",
     "animation_endpoint": "POST /v2/characters/animations",
-    "pixellab_character_id": "90bed6ad-2c5c-402b-9e28-7822408f14a6",
+    "pixellab_character_id": "6fbd68ec-efe8-433e-8064-fbe8f00991e2",
     "view": "low top-down",
     "character_canvas": [
       48,
       48
     ],
-    "prompt": "full-body friendly fantasy traveling merchant, middle-aged man with realistic proportions, not chibi, warm smile, short brown beard, brown hair tied back, dark forest-green hooded traveling cloak, brown leather vest over cream linen shirt, leather belt with several coin pouches, large leather backpack with a rolled blanket, dark trousers, worn leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting"
+    "prompt": "full-body wandering merchant, man about 50 years old, slightly stocky build with broad shoulders, realistic proportions, not chibi, weathered lightly tanned face, friendly but attentive expression, dark brown hair with many silver-gray strands, short neat graying beard, hood lowered resting behind the shoulders; thick weathered olive-green travelling coat with visible stitching and worn cuffs; faded burgundy tunic under a dark brown leather vest; wide leather belt with several pouches, a coin purse and old iron keys; dark brown trousers tucked into sturdy mud-stained boots; worn fingerless gloves; large travelling backpack with rolled blankets strapped on top and small potion bottles hanging from it; a small brass lantern hanging from the belt; detailed dark fantasy pixel art, soft top-left lighting"
   },
-  "frame_width": 68,
-  "frame_height": 68,
+  "frame_width": 80,
+  "frame_height": 80,
   "pivot": {
-    "x": 34,
-    "y": 57,
+    "x": 40,
+    "y": 62,
     "note": "foot contact point in frame pixels"
   },
   "character_body_size_south": [
-    36,
+    33,
     46
   ],
   "directions": [
@@ -45,6 +45,24 @@
   },
   "sheet_layout": "rows = directions in 'directions' order, columns = frames, no spacing",
   "animations": {
+    "gesture": {
+      "sheet": "spritesheets/eldric_gesture.png",
+      "frames": 8,
+      "frame_duration_ms": 120,
+      "fps": 8.333,
+      "loop": false,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "gesture/<direction>/frame_NN.png"
+    },
     "idle": {
       "sheet": "spritesheets/eldric_idle.png",
       "frames": 4,
@@ -62,14 +80,50 @@
         "nw"
       ],
       "frame_dir": "idle/<direction>/frame_NN.png"
+    },
+    "greet": {
+      "sheet": "spritesheets/eldric_greet.png",
+      "frames": 8,
+      "frame_duration_ms": 110,
+      "fps": 9.091,
+      "loop": false,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "greet/<direction>/frame_NN.png"
+    },
+    "walk": {
+      "sheet": "spritesheets/eldric_walk.png",
+      "frames": 8,
+      "frame_duration_ms": 100,
+      "fps": 10.0,
+      "loop": true,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "walk/<direction>/frame_NN.png"
     }
   },
   "filtering": "nearest",
   "portrait": {
     "file": "portrait.png",
     "size": [
-      64,
-      64
+      128,
+      128
     ],
     "source": "POST /v2/portrait-character-pro (character_to_portrait, from rotations/s)"
   }

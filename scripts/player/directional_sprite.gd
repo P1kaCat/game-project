@@ -51,6 +51,8 @@ func _load_metadata() -> void:
 		var rows: Array = anim.rows
 		for dir_code: String in dirs:
 			var row := rows.find(dir_code)
+			if row == -1:
+				continue  # animation not drawn for this direction (e.g. one-off moves)
 			var sf_name := StringName("%s_%s" % [anim_name, dir_code])
 			frames.add_animation(sf_name)
 			frames.set_animation_loop(sf_name, anim.loop)
@@ -65,6 +67,11 @@ func _load_metadata() -> void:
 
 func has_state(state: String) -> bool:
 	return _meta.animations.has(state)
+
+
+## Directions an animation exists in (all 8 for movement, maybe one for one-off moves).
+func state_directions(state: String) -> Array:
+	return _meta.animations[state].rows if has_state(state) else []
 
 
 ## Plays `state` facing `dir`. Turning while staying in the same state keeps the

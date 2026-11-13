@@ -19,7 +19,8 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_assets import DIRS, binarize_alpha  # noqa: E402
 
-FRAME_MS = {"idle": 200, "walk": 100, "run": 75}
+FRAME_MS = {"idle": 200, "walk": 100, "run": 75, "greet": 110, "gesture": 120}
+ONCE = {"greet", "gesture", "getup"}  # one-shot animations (no loop)
 
 
 def main(src: Path, name: str, root: Path, portrait: Path | None) -> None:
@@ -32,34 +33,44 @@ def main(src: Path, name: str, root: Path, portrait: Path | None) -> None:
         shutil.rmtree(out)
     (out / "spritesheets").mkdir(parents=True)
 
-    anims = {}
-    canvas = None
-    for key, dirs in frames_meta["animations"].items():
-        anims[key] = {}
-        for code, pl in DIRS:
-            ims = [Image.open(src / p).convert("RGBA") for p in dirs[pl]]
-            for im in ims:
-                canvas = canvas or im.size
-                assert im.size == canvas, f"{key}/{pl}: {im.size} != {canvas}"
-            anims[key][code] = ims
-    cw, ch = canvas
+    # Animations can come on different canvases (68x68, 80x80...): centre-pad
+    # everything onto the largest one and align each animation's feet with the
+    # base rotations, like export_assets.py does for the player.
+    raw = {key: {code: [Image.open(src / p).convert("RGBA") for p in dirs[pl]] for code, pl in DIRS if pl in dirs}
+           for key, dirs in frames_meta["animations"].items()}
+    raw_rot = {code: Image.open(src / frames_meta["rotations"][pl]).convert("RGBA") for code, pl in DIRS}
+    sizes = [im.size for a in raw.values() for v in a.values() for im in v] + [im.size for im in raw_rot.values()]
+    cw, ch = max(w for w, _ in sizes), max(h for _, h in sizes)
+    canvas = (cw, ch)
+
+    def pad(im, dy=0):
+        c = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        c.alpha_composite(im, ((cw - im.width) // 2, (ch - im.height) // 2 + dy))
+        return c
+
+    def modal_bottom(ims):
+        b = [im.getbbox()[3] for im in ims if im.getbbox()]
+        return max(set(b), key=b.count)
 
     rotations = {}
     (out / "rotations").mkdir()
-    for code, pl in DIRS:
-        im = Image.open(src / frames_meta["rotations"][pl]).convert("RGBA")
-        pad = Image.new("RGBA", canvas, (0, 0, 0, 0))
-        pad.alpha_composite(im, ((cw - im.width) // 2, (ch - im.height) // 2))
-        rotations[code], _ = binarize_alpha(pad)
+    for code, im in raw_rot.items():
+        rotations[code], _ = binarize_alpha(pad(im))
         rotations[code].save(out / "rotations" / f"{code}.png")
+    ref = modal_bottom(rotations.values())
+    anims = {}
+    for key, per_dir in raw.items():
+        dy = ref - modal_bottom([pad(im) for v in per_dir.values() for im in v])
+        anims[key] = {code: [pad(im, dy) for im in ims] for code, ims in per_dir.items()}
 
     bottoms = [im.getbbox()[3] for im in rotations.values()]
     foot_y = max(set(bottoms), key=bottoms.count)
     anim_meta = {}
     for key, per_dir in anims.items():
         n = max(len(v) for v in per_dir.values())
-        sheet = Image.new("RGBA", (cw * n, ch * len(DIRS)), (0, 0, 0, 0))
-        for row, (code, _) in enumerate(DIRS):
+        rows = [code for code, _ in DIRS if code in per_dir]
+        sheet = Image.new("RGBA", (cw * n, ch * len(rows)), (0, 0, 0, 0))
+        for row, code in enumerate(rows):
             d = out / key / code
             d.mkdir(parents=True)
             for i, im in enumerate(per_dir[code]):
@@ -69,7 +80,7 @@ def main(src: Path, name: str, root: Path, portrait: Path | None) -> None:
         sheet.save(out / "spritesheets" / f"{name}_{key}.png")
         dur = FRAME_MS.get(key, 120)
         anim_meta[key] = {"sheet": f"spritesheets/{name}_{key}.png", "frames": n, "frame_duration_ms": dur,
-                          "fps": round(1000 / dur, 3), "loop": True, "rows": [c for c, _ in DIRS],
+                          "fps": round(1000 / dur, 3), "loop": key not in ONCE, "rows": rows,
                           "frame_dir": f"{key}/<direction>/frame_NN.png"}
 
     s_box = rotations["s"].getbbox()

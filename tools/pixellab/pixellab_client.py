@@ -153,6 +153,10 @@ def cmd_animate(args):
         body["action_description"] = args.action
     if args.frame_count:
         body["frame_count"] = args.frame_count
+    if getattr(args, "subject", None):
+        body["subject_description"] = args.subject
+    if getattr(args, "initial_pose", None):
+        body["initial_pose"] = args.initial_pose
     # keep_first_frame is only valid for custom (non-template_action) v3/pixminimax runs.
     if args.mode in ("v3", "pixminimax") and not args.template_action:
         body["keep_first_frame"] = not args.drop_first_frame
@@ -272,6 +276,73 @@ def cmd_icon(args):
     print(f"wrote {out}")
 
 
+def cmd_image(args):
+    """Scene / background illustration via the Pixen model (native resolution)."""
+    import base64
+    root = load_state()
+    body = {"description": args.description, "image_size": {"width": args.width, "height": args.height},
+            "no_background": args.no_bg, "detail": args.detail}
+    if args.outline:
+        body["outline"] = args.outline
+    if args.view:
+        body["view"] = args.view
+    if args.seed is not None:
+        body["seed"] = args.seed
+    resp = _request("POST", "/create-image-pixen", body)
+    print("image usage:", json.dumps(resp.get("usage")))
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(base64.b64decode(resp["image"]["base64"].split(",")[-1]))
+    root.setdefault("images", {})[args.key] = {"request": body, "file": str(out)}
+    save_state(root)
+    print(f"wrote {out}")
+
+
+def _ref(path: str, usage: str = "") -> dict:
+    import base64
+    from PIL import Image  # only needed for illustration generation
+    w, h = Image.open(path).size
+    r = {"image": {"type": "base64", "base64": base64.b64encode(Path(path).read_bytes()).decode()},
+         "size": {"width": w, "height": h}}
+    if usage:
+        r["usage_description"] = usage
+    return r
+
+
+def cmd_image2(args):
+    """Illustration via POST /generate-image-v2 (async job: no gateway timeout
+    for large images; optional style image + subject references)."""
+    import base64
+    root = load_state()
+    body = {"description": args.description, "image_size": {"width": args.width, "height": args.height},
+            "no_background": args.no_bg}
+    if args.style:
+        body["style_image"] = _ref(args.style)
+        body["style_options"] = {"color_palette": args.style_palette, "outline": True, "detail": True, "shading": True}
+    if args.ref:
+        body["reference_images"] = [_ref(p.split("::")[0], p.split("::")[1] if "::" in p else "") for p in args.ref]
+    if args.seed is not None:
+        body["seed"] = args.seed
+    resp = _request("POST", "/generate-image-v2", body)
+    job = poll_job(resp["background_job_id"], interval=6)
+    print("image2 job:", job["status"], json.dumps(job.get("usage")))
+    if job["status"] != "completed":
+        raise SystemExit(json.dumps(job, indent=2)[:3000])
+    imgs = (job.get("last_response") or {}).get("images", [])
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    for i, img in enumerate(imgs[: args.keep]):
+        data = img.get("base64") if isinstance(img, dict) else img
+        target = out if i == 0 else out.with_name(f"{out.stem}_{i}{out.suffix}")
+        target.write_bytes(base64.b64decode(data.split(",")[-1]))
+        print(f"wrote {target}")
+    stored = {k: v for k, v in body.items() if k not in ("style_image", "reference_images")}
+    stored["style"] = args.style
+    stored["refs"] = args.ref
+    root.setdefault("images", {})[args.key] = {"request": stored, "file": str(out), "usage": job.get("usage")}
+    save_state(root)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--npc", help="operate on state['npcs'][NPC] instead of the player")
@@ -302,6 +373,8 @@ def main(argv=None):
     a.add_argument("--frame-count", type=int)
     a.add_argument("--directions", help="comma-separated; default all 8")
     a.add_argument("--drop-first-frame", action="store_true")
+    a.add_argument("--subject", help="pixminimax: one noun phrase describing the character")
+    a.add_argument("--initial-pose", help="pixminimax: pose of the first frame")
     a.add_argument("--wait", action="store_true")
     a.set_defaults(func=cmd_animate)
 
@@ -343,6 +416,33 @@ def main(argv=None):
     ic.add_argument("--view")
     ic.add_argument("--seed", type=int)
     ic.set_defaults(func=cmd_icon)
+
+    im = sub.add_parser("image")
+    im.add_argument("--key", required=True)
+    im.add_argument("--description", required=True)
+    im.add_argument("--out", required=True)
+    im.add_argument("--width", type=int, default=576)
+    im.add_argument("--height", type=int, default=320)
+    im.add_argument("--no-bg", action="store_true")
+    im.add_argument("--detail", default="highly detailed")
+    im.add_argument("--outline")
+    im.add_argument("--view")
+    im.add_argument("--seed", type=int)
+    im.set_defaults(func=cmd_image)
+
+    i2 = sub.add_parser("image2")
+    i2.add_argument("--key", required=True)
+    i2.add_argument("--description", required=True)
+    i2.add_argument("--out", required=True)
+    i2.add_argument("--width", type=int, default=576)
+    i2.add_argument("--height", type=int, default=320)
+    i2.add_argument("--no-bg", action="store_true")
+    i2.add_argument("--style", help="style image path (pixel size / rendering)")
+    i2.add_argument("--style-palette", action="store_true", help="also copy the style image palette")
+    i2.add_argument("--ref", action="append", help="subject reference PATH[::how to use it]")
+    i2.add_argument("--keep", type=int, default=1)
+    i2.add_argument("--seed", type=int)
+    i2.set_defaults(func=cmd_image2)
 
     args = p.parse_args(argv)
     args.func(args)

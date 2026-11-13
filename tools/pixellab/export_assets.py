@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """Organise a PixelLab character ZIP export into the game's asset layout.
 
-usage: export_assets.py <extracted_character_zip_dir> <tiles_src_dir> <repo_root>
+usage: export_assets.py <extracted_character_zip_dir> <tiles_src_dir|-> <repo_root> [anim spec]
+
+anim spec: comma list of pixellab_key:local_name:frame_ms[:once], e.g.
+  idle:idle:200,walk:walk:100,run:run:75,getup:getup:110:once
+Animations may exist in only some directions (e.g. a one-off get-up move).
 
 Produces (relative to repo root):
 
@@ -76,7 +80,7 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
     raw: dict[str, dict[str, list[Image.Image]]] = {}
     for key, (name, _, _) in ANIMS.items():
         dirs = frames_meta["animations"][key]
-        raw[name] = {code: [Image.open(src / p).convert("RGBA") for p in dirs[pl]] for code, pl in DIRS}
+        raw[name] = {code: [Image.open(src / p).convert("RGBA") for p in dirs[pl]] for code, pl in DIRS if pl in dirs}
     raw_rot = {code: Image.open(src / frames_meta["rotations"][pl]).convert("RGBA") for code, pl in DIRS}
     cw = max([im.width for a in raw.values() for v in a.values() for im in v] + [im.width for im in raw_rot.values()])
     ch = max([im.height for a in raw.values() for v in a.values() for im in v] + [im.height for im in raw_rot.values()])
@@ -98,11 +102,11 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
         padded = {code: [pad(im) for im in ims] for code, ims in per_dir.items()}
         dy = ref_bottom - modal_bottom([im for ims in padded.values() for im in ims])
         anim_frames[name] = {code: [pad(im, dy) for im in ims] for code, ims in per_dir.items()}
-        print(f"{name}: source canvas {per_dir['s'][0].size}, feet aligned with dy={dy}")
+        print(f"{name}: source canvas {next(iter(per_dir.values()))[0].size}, dirs {list(per_dir)}, feet aligned with dy={dy}")
 
     # ---- foot pivot: bottom edge of the feet, horizontal centre of canvas -----
     bottoms = [rotations[c].getbbox()[3] for c, _ in DIRS]
-    bottoms += [im.getbbox()[3] for im in sum(anim_frames["idle"].values(), [])]
+    bottoms += [im.getbbox()[3] for im in sum(anim_frames.get("idle", {}).values(), [])]
     foot_y = max(set(bottoms), key=bottoms.count)  # most common bottom edge
     pivot = (cw // 2, foot_y)
 
@@ -119,8 +123,9 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
     anim_meta = {}
     for key, (name, dur, loop) in ANIMS.items():
         n_frames = max(len(v) for v in anim_frames[name].values())
-        sheet = Image.new("RGBA", (cw * n_frames, ch * len(DIRS)), (0, 0, 0, 0))
-        for row, (code, _) in enumerate(DIRS):
+        rows = [code for code, _ in DIRS if code in anim_frames[name]]
+        sheet = Image.new("RGBA", (cw * n_frames, ch * len(rows)), (0, 0, 0, 0))
+        for row, code in enumerate(rows):
             d = out / name / code
             d.mkdir(parents=True)
             frames = anim_frames[name][code]
@@ -138,7 +143,7 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
             "frame_duration_ms": dur,
             "fps": round(1000 / dur, 3),
             "loop": loop,
-            "rows": [c for c, _ in DIRS],
+            "rows": rows,
             "frame_dir": f"{name}/<direction>/frame_NN.png",
         }
 
@@ -180,7 +185,13 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
     (out / "player_animations.json").write_text(json.dumps(metadata, indent=2) + "\n")
 
     # ---- tiles -----------------------------------------------------------------
+    if str(tiles_src) == "-":
+        tile_imgs = None
     tout = root / "assets/tiles/terrain"
+    if str(tiles_src) == "-":
+        print(json.dumps({"canvas": canvas, "pivot": pivot, "body_south": metadata["character_body_size_south"],
+                          "animations": {k: v["frames"] for k, v in anim_meta.items()}}))
+        return
     if tout.exists():
         shutil.rmtree(tout)
     tout.mkdir(parents=True)
@@ -214,4 +225,9 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 4:
+        ANIMS.clear()
+        for spec in sys.argv[4].split(","):
+            parts = spec.split(":")
+            ANIMS[parts[0]] = (parts[1], int(parts[2]), not (len(parts) > 3 and parts[3] == "once"))
     main(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]))

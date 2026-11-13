@@ -4,13 +4,13 @@
     "generator": "PixelLab API v2",
     "character_endpoint": "POST /v2/create-character-v3",
     "animation_endpoint": "POST /v2/characters/animations",
-    "pixellab_character_id": "177bc5e2-6bb8-4b05-93bc-cfb45eea4c9c",
+    "pixellab_character_id": "8872497d-7c92-4520-b77d-70385d385f8c",
     "view": "low top-down",
     "character_canvas": [
       48,
       48
     ],
-    "prompt": "full-body fantasy adventurer, slender young adult with realistic proportions, small head, long legs, about 6 heads tall, not chibi, short tousled brown hair, light skin, off-white linen shirt under a brown leather jerkin, dark green short hooded cloak over the shoulders, leather belt with small pouch, dark brown trousers, brown leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting"
+    "prompt": "full-body androgynous young adult about 20 years old, slender delicate realistic proportions, not chibi, youthful soft face, pale amber eyes, tired but quietly determined expression, medium-length messy layered hair in an irregular natural mix of ash-brown and pale silver-white strands, fringe partly covering one side of the forehead; aged ivory ceremonial tunic with a high structured collar, torn and lightly stained, thin charcoal-black embroidered rune patterns on collar chest and sleeves; dark asymmetrical sash crossing the torso with small tarnished silver clasps; long fitted ivory sleeves, left forearm wrapped in faded bandages, narrow black metal cuff on the right wrist; long split ivory cloth panel hanging from the waist to the knees over dark charcoal trousers; dark leather ankle boots; small black broken circular mark on the side of the neck; no cloak, no backpack, no armor, empty hands; detailed dark fantasy pixel art, soft top-left lighting"
   },
   "frame_width": 80,
   "frame_height": 80,
@@ -20,14 +20,14 @@
     "note": "foot contact point in frame pixels; place this on the ground position"
   },
   "character_body_size_south": [
-    31,
-    47
+    24,
+    46
   ],
   "content_union_bbox": [
-    21,
-    15,
-    61,
-    67
+    26,
+    16,
+    63,
+    69
   ],
   "directions": [
     "n",
@@ -108,6 +108,17 @@
         "nw"
       ],
       "frame_dir": "run/<direction>/frame_NN.png"
+    },
+    "getup": {
+      "sheet": "spritesheets/player_getup.png",
+      "frames": 12,
+      "frame_duration_ms": 110,
+      "fps": 9.091,
+      "loop": false,
+      "rows": [
+        "se"
+      ],
+      "frame_dir": "getup/<direction>/frame_NN.png"
     }
   },
   "filtering": "nearest"

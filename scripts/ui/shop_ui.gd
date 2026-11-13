@@ -140,13 +140,13 @@ func _build() -> void:
 	details.add_child(_item_name)
 	_desc = Label.new()
 	_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_desc.add_theme_font_size_override("font_size", UITheme.SMALL_FONT_SIZE)
+	_desc.add_theme_font_size_override("font_size", UITheme.small_font_size())
 	_desc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	details.add_child(_desc)
 	var info := HBoxContainer.new()
 	details.add_child(info)
 	_owned = Label.new()
-	_owned.add_theme_font_size_override("font_size", UITheme.SMALL_FONT_SIZE)
+	_owned.add_theme_font_size_override("font_size", UITheme.small_font_size())
 	_owned.add_theme_color_override("font_color", UITheme.MUTED)
 	_owned.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(_owned)
@@ -155,7 +155,7 @@ func _build() -> void:
 	info.add_child(_price)
 
 	_message = Label.new()
-	_message.add_theme_font_size_override("font_size", UITheme.SMALL_FONT_SIZE)
+	_message.add_theme_font_size_override("font_size", UITheme.small_font_size())
 	_message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_message.custom_minimum_size = Vector2(0, 10)
 	v.add_child(_message)

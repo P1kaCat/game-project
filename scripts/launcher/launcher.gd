@@ -13,14 +13,14 @@ extends Control
 ##      other base_id -> the engine-level part changed, a full update is needed:
 ##                       Windows downloads the new exe, swaps it and restarts
 ##                       once; Android offers to download the new APK.
-## 4. Starts the game (scenes/main.tscn). Any network problem -> just plays.
+## 4. Starts the game (main menu). Any network problem -> just plays.
 ##
 ## Command-line (after `--`), mainly for tests: --check-updates (check in
 ## non-exported runs), --no-update-check, --update-base-url=URL (instead of
 ## https://github.com),
 ## --update-platform=windows|android, --update-exe-path=PATH, --no-restart.
 
-const GAME_SCENE := "res://scenes/main.tscn"
+const GAME_SCENE := "res://scenes/main_menu.tscn"
 const BUILD_INFO := "res://build_info.json"
 const CONTENT_DIR := "user://content"
 const CACHE_MANIFEST := "user://content/manifest.json"

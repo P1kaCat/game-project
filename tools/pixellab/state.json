@@ -367,6 +367,339 @@
         "source_image": "south.png",
         "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/eldric/portrait_64.png"
       }
+    },
+    "protagonist": {
+      "character_id": "8872497d-7c92-4520-b77d-70385d385f8c",
+      "character_job": "40d19204-e1fd-4a17-a985-c7442592d3aa",
+      "character_request": {
+        "description": "full-body androgynous young adult about 20 years old, slender delicate realistic proportions, not chibi, youthful soft face, pale amber eyes, tired but quietly determined expression, medium-length messy layered hair in an irregular natural mix of ash-brown and pale silver-white strands, fringe partly covering one side of the forehead; aged ivory ceremonial tunic with a high structured collar, torn and lightly stained, thin charcoal-black embroidered rune patterns on collar chest and sleeves; dark asymmetrical sash crossing the torso with small tarnished silver clasps; long fitted ivory sleeves, left forearm wrapped in faded bandages, narrow black metal cuff on the right wrist; long split ivory cloth panel hanging from the waist to the knees over dark charcoal trousers; dark leather ankle boots; small black broken circular mark on the side of the neck; no cloak, no backpack, no armor, empty hands; detailed dark fantasy pixel art, soft top-left lighting",
+        "name": "inscriptible",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "high detail"
+      },
+      "animations": {
+        "idle": {
+          "animation_group_id": "f4a13021-a706-4ebf-8c03-7a908bcfa176",
+          "jobs": {
+            "south": "3eec6a45-4b19-44c3-9db9-ab08b0539f95",
+            "south-east": "f857c6c9-8712-433d-af64-2b909742c218",
+            "east": "764b82ee-70c2-414f-8e38-c0ed470526f9",
+            "north-east": "fdf03a5f-4e4a-4abf-bd7b-21db42fbc282",
+            "north": "ab2b3120-3a49-46e8-a237-61dad10a1b31",
+            "north-west": "4c1a913e-200a-4ff3-8b38-dabfc3b2ce65",
+            "west": "40dc3ed2-79dd-4337-807b-6ee2d2618dd7",
+            "south-west": "a74a9b75-502a-47e7-b79b-6188f90fea0f"
+          },
+          "request": {
+            "animation_name": "idle",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "subtle tired idle breathing loop: standing still, shoulders rise and fall slowly, head slightly lowered, the ivory cloth panel sways a little, feet stay planted, seamless loop",
+            "frame_count": 4,
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "walk": {
+          "animation_group_id": "af673b63-7619-4097-92ea-416f3c50c12e",
+          "jobs": {
+            "south": "00b6a353-13c8-4983-8986-352760578955",
+            "south-east": "656cb97e-b1b7-4eb9-9ab5-93600c3ac451",
+            "east": "9dc35073-cc1a-4efc-8f1d-05178a445440",
+            "north-east": "1399ddcb-16e3-4a66-aa95-a6061d4144f6",
+            "north": "3c295336-be54-44d6-b94a-db4fc0750489",
+            "north-west": "e3dbbb5e-10fc-4103-a5f2-1af165d8b667",
+            "west": "a24a5e9d-078e-4fae-a07e-48f0e7a8dcf6",
+            "south-west": "308afbbf-3f04-4008-85ec-ca801240296c"
+          },
+          "request": {
+            "animation_name": "walk",
+            "mode": "skeleton-v3",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "calm natural walk cycle, slightly tired upright posture, arms swing gently, the long split ivory cloth panel at the waist moves softly with each step without hiding the legs, no wind, feet stay grounded",
+            "frame_count": 8
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "run": {
+          "animation_group_id": "f32e653f-ad91-4c67-a0ee-47714f61670c",
+          "jobs": {
+            "south": "3f43c421-931f-4823-ac6a-a00becbd6c3d",
+            "south-east": "01947c31-0940-41d8-a70a-abff8ba8822f",
+            "east": "bd9d40ae-dd4f-4f9c-8f4e-be15ffa746ab",
+            "north-east": "d48fd052-717a-4066-80dc-bfb8247a4842",
+            "north": "16106a86-3cb2-4140-a908-464fc89568b8",
+            "north-west": "c671caf4-7975-4875-a5cb-6cfdd58f5c59",
+            "west": "43ef56c9-c567-4b9d-a3e4-d9b622d81aaf",
+            "south-west": "ede15539-96f9-44b7-8fa5-170cd807b7a6"
+          },
+          "request": {
+            "animation_name": "run",
+            "mode": "skeleton-v3",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "steady running cycle, body leaning slightly forward, arms pumping at the sides, longer strides with a brief moment where both feet leave the ground, the ivory cloth panel trails a little behind, no wind",
+            "frame_count": 8
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        }
+      },
+      "portrait": {
+        "request": {
+          "direction": "character_to_portrait",
+          "view": "low top-down",
+          "result_size": 128
+        },
+        "source_image": "south.png",
+        "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/proto/portrait_128.png"
+      }
+    },
+    "eldric2": {
+      "character_id": "6fbd68ec-efe8-433e-8064-fbe8f00991e2",
+      "character_job": "9207ee9c-1e30-433f-8c8f-7c71e8d896ae",
+      "character_request": {
+        "description": "full-body wandering merchant, man about 50 years old, slightly stocky build with broad shoulders, realistic proportions, not chibi, weathered lightly tanned face, friendly but attentive expression, dark brown hair with many silver-gray strands, short neat graying beard, hood lowered resting behind the shoulders; thick weathered olive-green travelling coat with visible stitching and worn cuffs; faded burgundy tunic under a dark brown leather vest; wide leather belt with several pouches, a coin purse and old iron keys; dark brown trousers tucked into sturdy mud-stained boots; worn fingerless gloves; large travelling backpack with rolled blankets strapped on top and small potion bottles hanging from it; a small brass lantern hanging from the belt; detailed dark fantasy pixel art, soft top-left lighting",
+        "name": "eldric",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "high detail"
+      },
+      "animations": {
+        "idle": {
+          "animation_group_id": "0dbb42dd-cfef-412a-a0b7-3b06da6df107",
+          "jobs": {
+            "south": "4b62a8e6-9552-48bd-bfda-0518c726082b",
+            "south-east": "56ffec03-3927-477a-8689-dad4f1e30024",
+            "east": "112f890d-14cf-4303-838a-2e74a96cbb5d",
+            "north-east": "618ab043-2656-481a-a729-f854e15d1f84",
+            "north": "e62cb053-b36f-4bdb-9ff3-0e6c9201839d",
+            "north-west": "9b7cde7e-266f-46f7-92f0-7caa43e9de9a",
+            "west": "5de4e10d-915f-419b-9485-835bad88d973",
+            "south-west": "b4e64846-285b-4431-86ea-6cc2f0cf199c"
+          },
+          "request": {
+            "animation_name": "idle",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "subtle idle breathing loop: standing still, chest rises and falls slowly, the backpack and lantern sway only very slightly, feet stay planted, seamless loop",
+            "frame_count": 4,
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "walk": {
+          "animation_group_id": "fbca92fc-64ae-47bd-ab64-4fc082cceda9",
+          "jobs": {
+            "south": "f7f00671-7b77-4e4f-92ce-36c9cdd58383",
+            "south-east": "3b23e58a-884a-4b78-8860-715a3e9ad3d5",
+            "east": "9c152a4c-01cc-4a10-b3a6-6a4f305c084b",
+            "north-east": "2232c812-ef8b-4f0e-a9f5-620596f55fe9",
+            "north": "ec2ab16c-5da7-4eb9-90a9-1b82bcee42c3",
+            "north-west": "5207af7c-9e1a-4814-9e93-6fd5c15fd427",
+            "west": "bf2867cc-7cb0-489c-aaf3-32193715e78b",
+            "south-west": "5a894c80-7d91-4c35-9484-a7a84da4ae9d"
+          },
+          "request": {
+            "animation_name": "walk",
+            "mode": "skeleton-v3",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "calm steady walk of a sturdy middle-aged traveller carrying a heavy backpack, slight forward lean, arms swing a little, the backpack and the hanging lantern only bob slightly, no wind",
+            "frame_count": 8
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "greet": {
+          "animation_group_id": "d0c5eb48-cf12-4223-a466-bd44a4354751",
+          "jobs": {
+            "south": "00550091-0ef9-4e92-9af3-a178a9f95141",
+            "south-east": "40722c79-55d6-4c72-8967-f26923313298",
+            "east": "c678c389-5e7f-402c-83cb-68e00dba1432",
+            "north-east": "1e690604-b163-4fc3-9683-f0fc5e415e8a",
+            "north": "b8ce07ce-cc32-44ba-9805-54c447941060",
+            "north-west": "66a88b1c-46d5-4c39-9e39-ceae303d17c0",
+            "west": "2eb06730-6c98-46e8-8087-95fd7afba611",
+            "south-west": "7eef5f2d-b788-4c05-97ac-6dc99f7fecd5"
+          },
+          "request": {
+            "animation_name": "greet",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "friendly subtle greeting: raises one gloved hand to shoulder height in a small wave with a slight nod, then lowers it back, feet stay planted, backpack barely moves",
+            "frame_count": 8,
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "gesture": {
+          "animation_group_id": "02dea853-a2c1-4604-a80e-56e86b8640eb",
+          "jobs": {
+            "south": "be677e80-267c-4fa9-9e0b-7eeb58e54f27",
+            "south-east": "3f41516a-edb3-4675-8ca2-ca3c7e3766c7",
+            "east": "5c477ea3-1a34-428c-8cfc-e4f2f3d46e61",
+            "north-east": "836331fa-dce6-4ced-a0e9-153fe6f91f11",
+            "north": "ac96a20f-367a-4478-82cd-1d6e6213865d",
+            "north-west": "67680c5e-95d4-4ef1-a538-b741eef02553",
+            "west": "42a0f327-c313-4384-9c92-e1b00c93cb55",
+            "south-west": "bc41101f-5acb-4354-9406-903ae9fc0b26"
+          },
+          "request": {
+            "animation_name": "gesture",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "natural merchant talking gesture: opens one hand forward palm up as if presenting his goods, small nod, then returns to a relaxed stance, feet stay planted",
+            "frame_count": 8,
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        }
+      },
+      "portrait": {
+        "request": {
+          "direction": "character_to_portrait",
+          "view": "low top-down",
+          "result_size": 128
+        },
+        "source_image": "south.png",
+        "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/eld2/portrait_128.png"
+      }
     }
   },
   "icons": {
@@ -434,6 +767,152 @@
         "detail": "highly detailed"
       },
       "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/icons/gold_coin_small.png"
+    }
+  },
+  "images": {
+    "menu_bg": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no margin: dark fantasy landscape at dusk seen from a cliff; in the foreground on the right an ancient ruined gothic sanctuary with broken pointed stone arches and weathered pillars, moss and small plants reclaiming the stones; beyond, a vast misty valley with a winding river, a dark forest and distant ruined towers on the horizon; heavy overcast clouds fill the upper sky with faint pale light breaking through; beautiful, lonely and mysterious, muted desaturated blue grey and green tones, no characters, no text",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_game.png",
+        "refs": null
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/menu_bg_big.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "intro_1": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no text: an immense ancient stone hall in near darkness, colossal pillars covered from base to top with thousands of tiny delicate carved symbols, a single faint pale beam of light from above illuminating a large circular inscription engraved into the stone floor, a very small lone child standing at the centre of the circle, dust motes in the light, solemn and mysterious, cold grey and pale gold tones",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": null
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_1.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "intro_2": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no text: a crowded ceremonial hall of cold grey stone, rows of massive pillars, many faceless dark hooded silhouettes standing behind the pillars watching, in the centre a young person in simple plain clothes stands alone, before them a tall robed religious authority holds open a large book with an empty blank page, cold pale light from high windows, oppressive and silent, desaturated greys",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": null
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_2.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "intro_3": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no text: a vast dark ritual chamber, a young person with silver-streaked ash-brown hair in a torn ivory ceremonial tunic kneels at the centre of an enormous circular stone mechanism engraved with black symbols, a narrow black metal restraint on one wrist, rings of black inscriptions floating around them, cold white light rising from the circle, ominous and sacred, charcoal black ivory and cold silver tones",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": [
+          "assets/characters/player/rotations/s.png::the young person kneeling at the centre, same face, same silver-streaked ash-brown hair and torn ivory ceremonial tunic"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_3.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "intro_4": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no text: an abstract dimensional void of deep indigo and violet darkness, floating fragments of broken gothic architecture and stone pillars, distant stars, shattered pieces of pale inscriptions and faint distorted silhouettes drifting, a small figure in a torn ivory tunic falling slowly through the void reaching one hand toward a faint distant white light, dreamlike and silent",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": [
+          "assets/characters/player/rotations/se.png::the small falling figure, same silver-streaked hair and torn ivory tunic"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_4.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "intro_5": {
+      "request": {
+        "description": "full-bleed edge-to-edge pixel art scene filling the entire canvas, no border, no frame, no text: a quiet unfamiliar landscape under a heavy overcast grey sky, a damp grassy meadow in the foreground where a young person in a torn ivory tunic lies unconscious on their side, a dark forest in the middle distance and the silhouettes of ancient ruins and broken towers rising beyond the forest, soft grey diffuse light, melancholic calm, muted greens and greys",
+        "image_size": {
+          "width": 688,
+          "height": 384
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": [
+          "assets/characters/player/rotations/s.png::the young person lying unconscious on the grass, same silver-streaked hair and torn ivory tunic"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_5.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
     }
   }
 }

@@ -24,9 +24,17 @@ var safe_rect := Rect2()  # in viewport coordinates, for tests/debug
 
 
 func _ready() -> void:
+	apply_settings()
 	get_viewport().size_changed.connect(_layout)
 	GameInput.touch_ui_changed.connect(_on_touch_ui_changed)
 	_on_touch_ui_changed(GameInput.touch_ui_enabled)
+
+
+## Joystick size / opacity from the player settings (Paramètres > Tactile).
+func apply_settings() -> void:
+	joystick_diameter_mm = float(Settings.get_value("touch/joystick_size"))
+	root.modulate.a = float(Settings.get_value("touch/joystick_opacity"))
+	_layout.call_deferred()
 
 
 ## Hidden while dialogue / shop windows are open (movement is locked anyway).

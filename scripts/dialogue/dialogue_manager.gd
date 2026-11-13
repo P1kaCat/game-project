@@ -5,11 +5,13 @@ extends Node
 ## UI calls `confirm()` / `choose(i)` / `cancel()` back.
 ##
 ## Gameplay effects are emitted as `action_requested` (e.g. open_shop) and
-## handled elsewhere. Flags persist between conversations (future quests).
+## handled elsewhere. Flags persist between conversations: the owner may point
+## `flags` at the saved story flags (GameState.flags) so they survive reloads.
 
 signal started(dialogue_id: String)
 ## step = {speaker: id, name: String, portrait: Texture2D, text: String,
-##         choices: [{text, index}], cancel_index: int}
+##         choices: [{text, index}], cancel_index: int, node: id,
+##         anim: String ("" = none), pause: float}
 signal step_shown(step: Dictionary)
 signal action_requested(action: Dictionary)
 signal ended(dialogue_id: String, reason: String)
@@ -40,7 +42,22 @@ func start(data: Dictionary, speakers: Dictionary) -> void:
 	_speakers = speakers
 	_last_text = ""
 	started.emit(str(data.get("id", "")))
-	_enter(str(data.start))
+	_enter(start_node(data))
+
+
+## Start node for the current flags (first matching start rule, else "start").
+func start_node(data: Dictionary) -> String:
+	for r in data.get("start_rules", []):
+		if _condition_met(r.get("condition", {})):
+			return str(r.node)
+	return str(data.start)
+
+
+## {"flag": f, "equals": v} -- an unset flag counts as false.
+func _condition_met(cond: Dictionary) -> bool:
+	if cond.is_empty():
+		return true
+	return flags.get(cond.get("flag", ""), false) == cond.get("equals", true)
 
 
 ## Advance past a line without choices. Returns false if the step waits for a choice.
@@ -105,7 +122,8 @@ func _enter(id: String) -> void:
 		if visible[i].get("cancel", false):
 			cancel_index = i
 	_step = {"speaker": speaker_id, "name": str(sp.get("name", speaker_id)), "portrait": sp.get("portrait"),
-		"text": text, "choices": choices, "cancel_index": cancel_index, "node": id}
+		"text": text, "choices": choices, "cancel_index": cancel_index, "node": id,
+		"anim": str(node.get("anim", "")), "pause": float(node.get("pause", 0.0))}
 	step_shown.emit(_step)
 
 
@@ -113,7 +131,7 @@ func _visible_choices(node: Dictionary) -> Array:
 	var out := []
 	for c in node.get("choices", []):
 		var cond: Dictionary = c.get("condition", {})
-		if cond.is_empty() or flags.get(cond.get("flag", ""), null) == cond.get("equals", true):
+		if _condition_met(cond):
 			out.append(c)
 	return out
 

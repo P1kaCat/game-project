@@ -13,6 +13,8 @@ signal conversation_finished(npc: Npc)
 @export var player: Player
 @export var camera: FollowCamera
 @export var hud: MobileHUD
+## Portrait shown when the protagonist speaks (speaker id "player").
+@export var player_portrait: Texture2D = preload("res://assets/characters/player/portrait.png")
 
 var dialogue_manager := DialogueManager.new()
 var dialogue_ui := DialogueUI.new()
@@ -34,6 +36,7 @@ func _ready() -> void:
 	shop_ui.name = "ShopUI"
 	add_child(shop_ui)
 	dialogue_manager.action_requested.connect(_on_action)
+	dialogue_manager.step_shown.connect(_on_step)
 	dialogue_manager.ended.connect(_on_dialogue_ended)
 	shop_ui.closed.connect(_finish)
 	for n in get_tree().get_nodes_in_group(&"npc"):
@@ -62,9 +65,20 @@ func _on_npc_interaction(npc: Npc, _by: Node) -> void:
 	player.face_towards(npc.global_position)
 	npc.face_towards(player.global_position)
 	conversation_started.emit(npc)
-	var speakers := {String(npc.definition.id): {"name": npc.definition.display_name, "portrait": npc.definition.portrait}}
+	var speakers := {
+		String(npc.definition.id): {"name": npc.definition.display_name, "portrait": npc.definition.portrait},
+		"player": {"name": Loc.t("name.player"), "portrait": player_portrait},
+	}
+	dialogue_manager.flags = GameState.flags  # story flags are saved with the game
 	dialogue_manager.start(data, speakers)
 	_frame(dialogue_ui.free_rect())
+
+
+## Lines can ask the speaking NPC for a one-shot gesture ("anim" in the data).
+func _on_step(step: Dictionary) -> void:
+	var anim := str(step.get("anim", ""))
+	if anim != "" and current_npc and step.get("speaker", "") != "player":
+		current_npc.play_action(anim)
 
 
 func _on_action(action: Dictionary) -> void:
@@ -113,5 +127,5 @@ func _frame(free: Rect2) -> void:
 
 func _load_dialogue(path: String) -> Dictionary:
 	if not _dialogue_cache.has(path):
-		_dialogue_cache[path] = DialogueData.load_file(path)
+		_dialogue_cache[path] = DialogueData.load_file(Loc.localized_path(path))
 	return _dialogue_cache[path]

@@ -3,7 +3,10 @@ extends RefCounted
 ## Loads and validates a dialogue graph (res://data/dialogues/*.json).
 ##
 ## Format:
-##   {"id", "speaker" (default speaker id), "start" (node id), "nodes": {
+##   {"id", "speaker" (default speaker id), "start" (node id),
+##    "start_rules"?: [ {"condition": {"flag", "equals"?}, "node": id} ]
+##                     first matching rule picks the start node (story state),
+##    "nodes": {
 ##      "<id>": {
 ##        "speaker"?: id,          who says the text (defaults to dialogue speaker)
 ##        "text"?: "...",          a line (typewriter)
@@ -11,6 +14,8 @@ extends RefCounted
 ##                       "actions"?: [...], "cancel"?: bool} ],
 ##        "actions"?: [ {"type": "...", ...} ],   run when the node is left
 ##        "set_flags"?: {"flag": value},          set when the node is entered
+##        "anim"?: "greet",        one-shot animation of the speaking NPC
+##        "pause"?: seconds,       silence before the line starts typing
 ##        "next"?: "<id>" | "end" } } }
 ## A text node followed by a choices-only node shows the choices under that
 ## text (classic JRPG prompt). "end" closes the conversation.
@@ -32,6 +37,9 @@ static func validate(data: Dictionary) -> PackedStringArray:
 	var nodes: Dictionary = data.get("nodes", {})
 	if not nodes.has(str(data.get("start", ""))):
 		errors.append("start node '%s' missing" % data.get("start", ""))
+	for r in data.get("start_rules", []):
+		if not r is Dictionary or not nodes.has(str(r.get("node", ""))):
+			errors.append("start rule points to unknown node '%s'" % (r.get("node", "") if r is Dictionary else r))
 	for id in nodes:
 		var n: Dictionary = nodes[id]
 		var targets := []

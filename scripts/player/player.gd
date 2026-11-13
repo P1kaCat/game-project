@@ -23,10 +23,10 @@ signal interacted
 ## rate without foot sliding (measured from the stride in the frames). The
 ## animation is sped up by speed / reference, so faster movement keeps the
 ## feet planted instead of sliding.
-## (skeleton-v3 cycles: measured stride ~65 % / 75 % of the first versions;
-## walk slightly below its no-slide value so the cadence stays natural.)
-@export var walk_anim_reference_speed := 40.0
-@export var run_anim_reference_speed := 90.0
+## (measured from the protagonist's skeleton-v3 stride; walk slightly above its
+## no-slide value so the cadence stays natural.)
+@export var walk_anim_reference_speed := 37.0
+@export var run_anim_reference_speed := 80.0
 ## Ground-space acceleration / braking in px/s². High values feel responsive;
 ## the short ramp only removes the 1-frame start/stop pop.
 @export var acceleration := 1400.0
@@ -56,6 +56,10 @@ var facing := Direction8.S
 ## Current ground-space velocity (undistorted), useful for debugging/tests.
 var ground_velocity := Vector2.ZERO
 var is_running := false
+
+## While true the sprite is driven from outside (story animations such as the
+## awakening get-up); movement-based animation selection is skipped.
+var animation_override := false
 
 var _move_sector := -1
 var _facing_sector := Direction8.sector(Direction8.S)
@@ -89,7 +93,8 @@ func _physics_process(delta: float) -> void:
 	if get_slide_collision_count() > 0:
 		_resolve_collision(start, delta)
 
-	_update_animation(target)
+	if not animation_override:
+		_update_animation(target)
 
 
 ## After hitting something: keep useful slides along a face, but stop cleanly
@@ -137,6 +142,12 @@ func face_towards(world_pos: Vector2) -> void:
 	var d := Iso.screen_to_ground(world_pos - global_position)
 	if d.length() > 0.5:
 		_set_facing(Direction8.sector_of_vector(d))
+		sprite.play_state("idle", facing)
+
+
+func set_facing(dir_code: String) -> void:
+	_set_facing(Direction8.sector(dir_code))
+	if not animation_override:
 		sprite.play_state("idle", facing)
 
 

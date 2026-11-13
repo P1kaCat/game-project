@@ -36,6 +36,14 @@ func snap_to_target() -> void:
 	reset_physics_interpolation()
 
 
+## Starts the view displaced by `offset` (it then glides back to the target at
+## `follow_speed`), e.g. looking at the sky before settling on the player.
+func start_offset(offset: Vector2) -> void:
+	_smoothed += offset
+	global_position = _smoothed
+	reset_physics_interpolation()
+
+
 ## Frames world points (e.g. player + NPC during a conversation) so that their
 ## midpoint appears at `screen_anchor` (viewport pixels). Smoothly animated.
 func frame_points(points: Array[Vector2], screen_anchor: Vector2) -> void:

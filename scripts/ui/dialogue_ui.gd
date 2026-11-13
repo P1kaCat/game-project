@@ -27,7 +27,9 @@ signal closed
 @export var choice_arm_delay := 0.2
 
 const BOX_HEIGHT := 88
-const PORTRAIT := 64
+## Portraits are 128 px pixel art shown 1:1 as a bust standing on the box's
+## left edge (it rises above the box), never resampled.
+const PORTRAIT := 128
 const MARGIN := 6
 
 var manager: DialogueManager
@@ -37,6 +39,7 @@ var is_typing := false
 var _root: Control
 var _box: PanelContainer
 var _portrait_holder: Control
+var _text_spacer: Control
 var _portrait: TextureRect
 var _name: Label
 var _text: Label
@@ -86,13 +89,16 @@ func _build() -> void:
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_box.add_child(row)
 
+	_text_spacer = Control.new()
+	_text_spacer.custom_minimum_size = Vector2(PORTRAIT + 6, 0)
+	_text_spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(_text_spacer)
 	_portrait_holder = Control.new()
-	_portrait_holder.custom_minimum_size = Vector2(PORTRAIT + 8, PORTRAIT + 8)
-	_portrait_holder.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_portrait_holder.size = Vector2(PORTRAIT + 8, PORTRAIT + 8)
 	_portrait_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(_portrait_holder)
+	_root.add_child(_portrait_holder)
 	var bg := ColorRect.new()
-	bg.color = Color(0.09, 0.07, 0.12)
+	bg.color = Color(0.07, 0.07, 0.09)
 	bg.position = Vector2(4, 4)
 	bg.size = Vector2(PORTRAIT, PORTRAIT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -162,6 +168,8 @@ func _layout() -> void:
 	_box.position = Vector2(safe.position.x + MARGIN, safe.end.y - MARGIN - BOX_HEIGHT).round()
 	_box.size = Vector2(safe.size.x - 2 * MARGIN, BOX_HEIGHT).round()
 	_arrow.position = _box.position + _box.size - Vector2(18, 14)
+	# Bust: bottom of the frame sits on the box's bottom border, left-aligned.
+	_portrait_holder.position = Vector2(_box.position.x + 2, _box.position.y + _box.size.y - PORTRAIT - 8 - 2).round()
 	if _choices_panel.visible:
 		_layout_choices()
 
@@ -175,7 +183,7 @@ func _layout_choices() -> void:
 	var w := 0.0
 	var font := UITheme.get_theme().default_font if UITheme.get_theme().default_font else ThemeDB.fallback_font
 	for b in _choices_box.get_children():
-		w = maxf(w, font.get_string_size((b as Button).text, HORIZONTAL_ALIGNMENT_LEFT, -1, UITheme.FONT_SIZE).x)
+		w = maxf(w, font.get_string_size((b as Button).text, HORIZONTAL_ALIGNMENT_LEFT, -1, UITheme.font_size()).x)
 	w = clampf(w + 40, 120, _box.size.x * 0.6)
 	var h := _choices_box.get_child_count() * (_choice_row_height() + 3) - 3 + 16
 	_choices_panel.size = Vector2(w, h).round()
@@ -188,13 +196,18 @@ func _layout_choices() -> void:
 func free_rect() -> Rect2:
 	var safe := SafeArea.viewport_rect(get_viewport())
 	var right := _box.position.x + _box.size.x - 200.0
-	return Rect2(safe.position.x, safe.position.y,
-		maxf(80.0, right - safe.position.x), maxf(60.0, _box.position.y - safe.position.y - 4))
+	var left := safe.position.x
+	if _portrait_holder.visible:
+		left = _portrait_holder.position.x + _portrait_holder.size.x
+	return Rect2(left, safe.position.y,
+		maxf(80.0, right - left), maxf(60.0, _box.position.y - safe.position.y - 4))
 
 
 ## Screen rects covered by the window (for tests / overlap checks).
 func covered_rects() -> Array[Rect2]:
 	var out: Array[Rect2] = [Rect2(_box.position, _box.size)]
+	if _portrait_holder.visible:
+		out.append(Rect2(_portrait_holder.position, _portrait_holder.size))
 	if _choices_panel.visible:
 		out.append(Rect2(_choices_panel.position, _choices_panel.size))
 	return out
@@ -215,6 +228,8 @@ func open() -> void:
 	_box.position.y += 12
 	_tween = create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(_box, "modulate:a", 1.0, 0.18)
+	_portrait_holder.modulate.a = 0.0
+	_tween.tween_property(_portrait_holder, "modulate:a", 1.0, 0.25)
 	_tween.tween_property(_box, "position:y", target_y, 0.18)
 	opened.emit()
 
@@ -231,6 +246,7 @@ func close() -> void:
 		_tween.kill()
 	_tween = create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	_tween.tween_property(_box, "modulate:a", 0.0, 0.14)
+	_tween.tween_property(_portrait_holder, "modulate:a", 0.0, 0.14)
 	_tween.tween_property(_box, "position:y", _box.position.y + 12, 0.14)
 	_tween.chain().tween_callback(func() -> void:
 		visible = false
@@ -242,12 +258,15 @@ func _on_step(step: Dictionary) -> void:
 	open()
 	_step = step
 	_name.text = str(step.get("name", ""))
+	_name.add_theme_color_override("font_color", UITheme.SILVER if step.get("speaker", "") == "player" else UITheme.GOLD)
 	var tex: Texture2D = step.get("portrait")
 	_portrait.texture = tex
 	_portrait_holder.visible = tex != null
+	_text_spacer.visible = tex != null
+	chars_per_second = Settings.text_cps()
 	_text.text = str(step.get("text", ""))
 	_shown = 0.0
-	_pause = 0.0
+	_pause = float(step.get("pause", 0.0))
 	_text.visible_characters = 0
 	is_typing = _text.get_total_character_count() > 0
 	_arrow.visible = false
