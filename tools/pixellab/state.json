@@ -1,0 +1,225 @@
+{
+  "rejected": [
+    {
+      "character_id": "3c5fe5ab-8b10-4732-850f-99430785401b",
+      "reason": "64x64 canvas -> figure ~62px tall (spec ~48px); head too large",
+      "request": {
+        "description": "full-body fantasy adventurer, realistic heroic proportions (not chibi, about 6 heads tall), short tousled brown hair, light skin, neutral expression, off-white linen shirt under a brown leather jerkin, dark green short hooded cloak over the shoulders, leather belt with small pouch, dark brown trousers, brown leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, consistent soft top-left lighting",
+        "name": "player",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "high detail"
+      }
+    },
+    {
+      "animation": "walk (pixminimax template_action walking)",
+      "animation_group_id": "3fbae6d2-493b-4e8b-8289-6f243a314636",
+      "reason": "4px lateral body drift, weak leg alternation; v3 engine chosen instead (deleted)"
+    }
+  ],
+  "character_id": "177bc5e2-6bb8-4b05-93bc-cfb45eea4c9c",
+  "character_job": "54329517-e68e-48ad-ae4f-f38aa106347c",
+  "character_request": {
+    "description": "full-body fantasy adventurer, slender young adult with realistic proportions, small head, long legs, about 6 heads tall, not chibi, short tousled brown hair, light skin, off-white linen shirt under a brown leather jerkin, dark green short hooded cloak over the shoulders, leather belt with small pouch, dark brown trousers, brown leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting",
+    "name": "player",
+    "image_size": {
+      "width": 48,
+      "height": 48
+    },
+    "view": "low top-down",
+    "template_id": "mannequin",
+    "no_background": true,
+    "outline": "single color black outline",
+    "detail": "high detail"
+  },
+  "animations": {
+    "idle": {
+      "animation_group_id": "bf60a945-a971-4341-b87a-ef7c704fe04b",
+      "jobs": {
+        "south": "59397900-64ba-4709-9ae7-90291dd2dae3",
+        "north": "8e42af98-39f1-403b-9f8a-eb13b364a861",
+        "north-east": "5d20f466-6914-4c01-9416-cbbcb236a940",
+        "east": "0534e60b-827c-4a1a-8165-d56dbaf43909",
+        "south-east": "b45a2b46-12a3-4610-83e8-c5d55d8f415b",
+        "south-west": "522f647c-39eb-40b1-a77a-acb6646a7f54",
+        "west": "ec7a2198-8267-464a-94ad-7ba7a96ad11d",
+        "north-west": "10f72db6-2196-4f93-a3a2-34f0d3ec563d"
+      },
+      "request": {
+        "animation_name": "idle",
+        "mode": "pixminimax",
+        "directions": [
+          "north",
+          "north-east",
+          "east",
+          "south-east",
+          "south-west",
+          "west",
+          "north-west"
+        ],
+        "action_description": "subtle idle breathing loop: standing still in place, chest gently rises and falls, shoulders lift very slightly, cloak sways a little, feet stay planted, no stepping, seamless loop",
+        "frame_count": 4,
+        "keep_first_frame": false,
+        "animation_group_id": "bf60a945-a971-4341-b87a-ef7c704fe04b"
+      },
+      "status": {
+        "south": "completed",
+        "north": "completed",
+        "north-east": "completed",
+        "east": "completed",
+        "south-east": "completed",
+        "south-west": "completed",
+        "west": "completed",
+        "north-west": "completed"
+      }
+    },
+    "walk": {
+      "animation_group_id": "9cf1c59d-e134-4bdc-9e52-dd7e9af17663",
+      "jobs": {
+        "south": "92c67dd2-c735-4b5c-b451-44668d032875",
+        "north": "ec1bf187-845d-4134-8b64-aff38264f655",
+        "north-east": "10e7514a-b5fd-43e6-98b9-cce4516ad2f0",
+        "east": "4c46b6b2-bf49-4672-a2a7-beaffd116cf1",
+        "south-east": "7b855bc5-8863-4913-9aba-42780d14a765",
+        "south-west": "e6500d2d-d1bd-44ca-9c3c-83c7de90b80d",
+        "west": "02bf2301-7937-4ace-b2e2-1d9256591aca",
+        "north-west": "0d9eed96-a3af-4a0d-82cf-853596dde928"
+      },
+      "request": {
+        "animation_name": "walk",
+        "mode": "v3",
+        "directions": [
+          "north",
+          "north-east",
+          "east",
+          "south-east",
+          "south-west",
+          "west",
+          "north-west"
+        ],
+        "template_action": "walking",
+        "animation_group_id": "9cf1c59d-e134-4bdc-9e52-dd7e9af17663"
+      },
+      "status": {
+        "south": "completed",
+        "north": "completed",
+        "north-east": "completed",
+        "east": "completed",
+        "south-east": "completed",
+        "south-west": "completed",
+        "west": "completed",
+        "north-west": "completed"
+      }
+    },
+    "run": {
+      "animation_group_id": "85db1ceb-1b91-4862-9d0f-ea8ef6c49389",
+      "jobs": {
+        "south": "cadb8827-4fae-471c-b09f-b2a3566b53fd",
+        "south-east": "ff2a321f-efa5-4515-bdb0-1835b64ab791",
+        "east": "f821bcac-918e-49ba-b6a0-5f19770f7455",
+        "north-east": "06b34ac9-0eaf-4db5-9516-2454cb52d163",
+        "north": "9fa4aee9-476a-4933-8616-8e53e11f1cf6",
+        "north-west": "8565485c-011a-4aa4-b4ba-e0f3c9c299a7",
+        "west": "6393f16c-2da0-4400-8a54-31d2e5b0d17f",
+        "south-west": "fb7c2283-32a0-4af5-acb0-9ddf3d45a452"
+      },
+      "request": {
+        "animation_name": "run",
+        "mode": "v3",
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "template_action": "running"
+      },
+      "status": {
+        "south": "completed",
+        "south-east": "completed",
+        "east": "completed",
+        "north-east": "completed",
+        "north": "completed",
+        "north-west": "completed",
+        "west": "completed",
+        "south-west": "completed"
+      }
+    }
+  },
+  "tiles": {
+    "grass": {
+      "tile_id": "21694f79-0501-486f-88e0-877aa4183244",
+      "request": {
+        "description": "lush green grass ground tile, short grass blades, fantasy RPG",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "isometric_tile_size": 32,
+        "isometric_tile_shape": "thin tile",
+        "outline": "lineless",
+        "shading": "medium shading",
+        "detail": "highly detailed"
+      },
+      "file": "assets/tiles/terrain/grass.png"
+    },
+    "grass_flowers": {
+      "tile_id": "819a1bf5-1056-463c-b734-194ca8b92855",
+      "request": {
+        "description": "lush green grass ground tile with a few tiny white and yellow wildflowers, short grass blades, fantasy RPG",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "isometric_tile_size": 32,
+        "isometric_tile_shape": "thin tile",
+        "outline": "lineless",
+        "shading": "medium shading",
+        "detail": "highly detailed"
+      },
+      "file": "assets/tiles/terrain/grass_flowers.png"
+    },
+    "dirt": {
+      "tile_id": "9ada4f51-c944-493c-8273-5a09e0828f72",
+      "request": {
+        "description": "packed brown dirt path ground tile, small pebbles, fantasy RPG",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "isometric_tile_size": 32,
+        "isometric_tile_shape": "thin tile",
+        "outline": "lineless",
+        "shading": "medium shading",
+        "detail": "highly detailed"
+      },
+      "file": "assets/tiles/terrain/dirt.png"
+    },
+    "cobblestone": {
+      "tile_id": "7167254e-2183-440f-8d46-9d1034754def",
+      "request": {
+        "description": "grey cobblestone pavement ground tile, worn rounded stones, fantasy RPG village",
+        "image_size": {
+          "width": 64,
+          "height": 64
+        },
+        "isometric_tile_size": 32,
+        "isometric_tile_shape": "thin tile",
+        "outline": "lineless",
+        "shading": "medium shading",
+        "detail": "highly detailed"
+      },
+      "file": "assets/tiles/terrain/cobblestone.png"
+    }
+  }
+}

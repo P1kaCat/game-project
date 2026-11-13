@@ -1,0 +1,114 @@
+{
+  "name": "player",
+  "source": {
+    "generator": "PixelLab API v2",
+    "character_endpoint": "POST /v2/create-character-v3",
+    "animation_endpoint": "POST /v2/characters/animations",
+    "pixellab_character_id": "177bc5e2-6bb8-4b05-93bc-cfb45eea4c9c",
+    "view": "low top-down",
+    "character_canvas": [
+      48,
+      48
+    ],
+    "prompt": "full-body fantasy adventurer, slender young adult with realistic proportions, small head, long legs, about 6 heads tall, not chibi, short tousled brown hair, light skin, off-white linen shirt under a brown leather jerkin, dark green short hooded cloak over the shoulders, leather belt with small pouch, dark brown trousers, brown leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting"
+  },
+  "frame_width": 68,
+  "frame_height": 68,
+  "pivot": {
+    "x": 34,
+    "y": 57,
+    "note": "foot contact point in frame pixels; place this on the ground position"
+  },
+  "character_body_size_south": [
+    31,
+    47
+  ],
+  "content_union_bbox": [
+    11,
+    8,
+    56,
+    60
+  ],
+  "directions": [
+    "n",
+    "ne",
+    "e",
+    "se",
+    "s",
+    "sw",
+    "w",
+    "nw"
+  ],
+  "direction_names": {
+    "n": "north",
+    "ne": "north-east",
+    "e": "east",
+    "se": "south-east",
+    "s": "south",
+    "sw": "south-west",
+    "w": "west",
+    "nw": "north-west"
+  },
+  "sheet_layout": "rows = directions in 'directions' order, columns = frames left to right, no padding/spacing",
+  "rotations": {
+    "dir": "rotations/<direction>.png",
+    "sheet": "spritesheets/player_rotations.png"
+  },
+  "animations": {
+    "idle": {
+      "sheet": "spritesheets/player_idle.png",
+      "frames": 4,
+      "frame_duration_ms": 200,
+      "fps": 5.0,
+      "loop": true,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "idle/<direction>/frame_NN.png"
+    },
+    "walk": {
+      "sheet": "spritesheets/player_walk.png",
+      "frames": 8,
+      "frame_duration_ms": 100,
+      "fps": 10.0,
+      "loop": true,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "walk/<direction>/frame_NN.png"
+    },
+    "run": {
+      "sheet": "spritesheets/player_run.png",
+      "frames": 8,
+      "frame_duration_ms": 75,
+      "fps": 13.333,
+      "loop": true,
+      "rows": [
+        "n",
+        "ne",
+        "e",
+        "se",
+        "s",
+        "sw",
+        "w",
+        "nw"
+      ],
+      "frame_dir": "run/<direction>/frame_NN.png"
+    }
+  },
+  "filtering": "nearest"
+}

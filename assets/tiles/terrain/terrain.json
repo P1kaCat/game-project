@@ -1,0 +1,39 @@
+{
+  "source": {
+    "generator": "PixelLab API v2",
+    "endpoint": "POST /v2/create-isometric-tile",
+    "isometric_tile_size": 32,
+    "isometric_tile_shape": "thin tile",
+    "image_size": [
+      64,
+      64
+    ]
+  },
+  "projection": "2:1 isometric diamond",
+  "cell_size": [
+    64,
+    32
+  ],
+  "texture_size": [
+    64,
+    64
+  ],
+  "top_face": {
+    "top_vertex_y": 22,
+    "side_corner_y": 38,
+    "bottom_vertex_y": 54,
+    "center": [
+      32,
+      38
+    ],
+    "note": "the walkable top face is an exact 64x32 diamond centred at (32,38); ~10px of earth side below it"
+  },
+  "atlas": "terrain_atlas.png",
+  "atlas_order": [
+    "grass",
+    "grass_flowers",
+    "dirt",
+    "cobblestone"
+  ],
+  "filtering": "nearest"
+}
