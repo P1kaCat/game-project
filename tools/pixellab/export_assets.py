@@ -28,11 +28,14 @@ DIRS = [  # (short code, PixelLab name)
     ("s", "south"), ("sw", "south-west"), ("w", "west"), ("nw", "north-west"),
 ]
 
-# Animation key in PixelLab -> (local name, frame duration ms, loop)
+# Animation key in PixelLab -> (local name, frame duration ms, loop).
+# walk/run come from the skeleton-v3 regeneration (one shared 3D motion for
+# all 8 directions, cloak hanging naturally); the first v3 versions ("walk",
+# "run") had direction-dependent motion and a wind-blown cloak.
 ANIMS = {
     "idle": ("idle", 200, True),
-    "walk": ("walk", 100, True),
-    "run": ("run", 75, True),
+    "walk_s3": ("walk", 100, True),
+    "run_s3": ("run", 75, True),
 }
 
 TILES = ["grass", "grass_flowers", "dirt", "cobblestone"]
@@ -66,28 +69,36 @@ def main(src: Path, tiles_src: Path, root: Path) -> None:
     out.mkdir(parents=True)
 
     # ---- load everything, determine the common canvas ------------------------
-    anim_frames: dict[str, dict[str, list[Image.Image]]] = {}
-    canvas = None
+    # PixelLab grows each animation's canvas symmetrically around the character
+    # (68x68, 80x80...). Everything is centre-padded onto the largest canvas,
+    # then each animation is shifted vertically so its feet rest on the same
+    # row as the base rotations (no 1 px jump when switching animations).
+    raw: dict[str, dict[str, list[Image.Image]]] = {}
     for key, (name, _, _) in ANIMS.items():
         dirs = frames_meta["animations"][key]
-        anim_frames[name] = {}
-        for code, pl in DIRS:
-            ims = [Image.open(src / p).convert("RGBA") for p in dirs[pl]]
-            for im in ims:
-                if canvas is None:
-                    canvas = im.size
-                assert im.size == canvas, f"{name}/{pl} has size {im.size}, expected {canvas}"
-            anim_frames[name][code] = ims
-    cw, ch = canvas
+        raw[name] = {code: [Image.open(src / p).convert("RGBA") for p in dirs[pl]] for code, pl in DIRS}
+    raw_rot = {code: Image.open(src / frames_meta["rotations"][pl]).convert("RGBA") for code, pl in DIRS}
+    cw = max([im.width for a in raw.values() for v in a.values() for im in v] + [im.width for im in raw_rot.values()])
+    ch = max([im.height for a in raw.values() for v in a.values() for im in v] + [im.height for im in raw_rot.values()])
+    canvas = (cw, ch)
 
-    # Rotations are smaller (character canvas); PixelLab grows animation canvases
-    # symmetrically around the character, so centre-pad to the animation canvas.
-    rotations = {}
-    for code, pl in DIRS:
-        im = Image.open(src / frames_meta["rotations"][pl]).convert("RGBA")
-        pad = Image.new("RGBA", canvas, (0, 0, 0, 0))
-        pad.alpha_composite(im, ((cw - im.width) // 2, (ch - im.height) // 2))
-        rotations[code] = pad
+    def pad(im: Image.Image, dy: int = 0) -> Image.Image:
+        out = Image.new("RGBA", canvas, (0, 0, 0, 0))
+        out.alpha_composite(im, ((cw - im.width) // 2, (ch - im.height) // 2 + dy))
+        return out
+
+    def modal_bottom(ims) -> int:
+        b = [im.getbbox()[3] for im in ims if im.getbbox()]
+        return max(set(b), key=b.count)
+
+    rotations = {code: pad(im) for code, im in raw_rot.items()}
+    ref_bottom = modal_bottom(rotations.values())
+    anim_frames: dict[str, dict[str, list[Image.Image]]] = {}
+    for name, per_dir in raw.items():
+        padded = {code: [pad(im) for im in ims] for code, ims in per_dir.items()}
+        dy = ref_bottom - modal_bottom([im for ims in padded.values() for im in ims])
+        anim_frames[name] = {code: [pad(im, dy) for im in ims] for code, ims in per_dir.items()}
+        print(f"{name}: source canvas {per_dir['s'][0].size}, feet aligned with dy={dy}")
 
     # ---- foot pivot: bottom edge of the feet, horizontal centre of canvas -----
     bottoms = [rotations[c].getbbox()[3] for c, _ in DIRS]

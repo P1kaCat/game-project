@@ -203,8 +203,8 @@ them. It runs 164 checks (movement, touch, launcher, NPC/dialogue/shop), includi
 | Projection | true 2:1 isometric, diamond cells **64 × 32 px** |
 | Tile texture | 64 × 64 px: the top face is an exact 64 × 32 diamond centred at (32, 38), with ~10 px of earth side below |
 | Character body | **31 × 47 px** (south view), 8 directions |
-| Animation frame canvas | **68 × 68 px** for every frame of every animation, so nothing shifts |
-| Foot pivot | **(34, 57)** in frame pixels, placed on the ground position (tile centre) |
+| Animation frame canvas | **80 × 80 px** for every frame of every animation, feet aligned to the same row, so nothing shifts |
+| Foot pivot | **(40, 63)** in frame pixels, placed on the ground position (tile centre) |
 | Rendering | ~270 px tall internal resolution, **whole-number upscaling that fills any screen** (`PixelScaler`: e.g. 480×270 ×4 on 1080p, 533×240 ×3 on 720p phones, 542×244 ×5 on 1220p), nearest-neighbour filtering, 2D transforms snapped to pixels, physics interpolation for high-refresh screens |
 
 **Movement model.** Input and velocity live in an undistorted "ground" plane.
@@ -226,8 +226,13 @@ with diagonals still following the 2:1 tile edges.
 | Animation | Frames / direction | Frame duration | Engine |
 |---|---|---|---|
 | idle | 4 | 200 ms | PixelLab `pixminimax`, custom breathing action |
-| walk | 8 | 100 ms | PixelLab `v3`, template action `walking` |
-| run  | 8 | 75 ms  | PixelLab `v3`, template action `running` |
+| walk | 8 | 100 ms | PixelLab `skeleton-v3`: one shared 3D motion for all 8 directions, cloak hangs naturally |
+| run  | 8 | 75 ms  | PixelLab `skeleton-v3`, same approach |
+
+The first walk/run (v3 `walking`/`running` template actions) generated each
+direction independently: the cloak flew like a flag and E/W, SE/SW moved
+differently. They were replaced by `skeleton-v3` (3 generations/direction, 48
+total) and are kept in PixelLab as `walk`/`run` for reference.
 
 ![Rotations](docs/images/player_rotations_preview.png)
 ![Walk](docs/images/player_walk_preview.png)

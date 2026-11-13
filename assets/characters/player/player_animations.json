@@ -12,11 +12,11 @@
     ],
     "prompt": "full-body fantasy adventurer, slender young adult with realistic proportions, small head, long legs, about 6 heads tall, not chibi, short tousled brown hair, light skin, off-white linen shirt under a brown leather jerkin, dark green short hooded cloak over the shoulders, leather belt with small pouch, dark brown trousers, brown leather boots, empty hands, standing relaxed, clear readable silhouette, detailed fantasy RPG pixel art, soft top-left lighting"
   },
-  "frame_width": 68,
-  "frame_height": 68,
+  "frame_width": 80,
+  "frame_height": 80,
   "pivot": {
-    "x": 34,
-    "y": 57,
+    "x": 40,
+    "y": 63,
     "note": "foot contact point in frame pixels; place this on the ground position"
   },
   "character_body_size_south": [
@@ -24,10 +24,10 @@
     47
   ],
   "content_union_bbox": [
-    11,
-    8,
-    56,
-    60
+    21,
+    15,
+    61,
+    67
   ],
   "directions": [
     "n",

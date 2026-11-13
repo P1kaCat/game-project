@@ -131,7 +131,8 @@ func _test_spawn_and_anchor() -> void:
 	check("spawn: idle facing south", String(player.sprite.animation) == "idle_s",
 		String(player.sprite.animation))
 	var pivot: Vector2 = -player.sprite.offset
-	check("sprite: foot pivot on node origin", pivot == Vector2(34, 57), str(pivot))
+	var meta = JSON.parse_string(FileAccess.get_file_as_string(player.sprite.metadata_path))
+	check("sprite: foot pivot on node origin", pivot == Vector2(meta.pivot.x, meta.pivot.y), str(pivot))
 	check("no input: no movement", player.velocity == Vector2.ZERO and player.ground_velocity == Vector2.ZERO)
 
 
@@ -591,7 +592,8 @@ func _test_assets_preserved() -> void:
 				ok = false
 	var tex := frames.get_frame_texture(&"walk_s", 0) as AtlasTexture
 	check("PixelLab animations loaded (3 x 8 dirs)", ok)
-	check("sprite frames 68x68, nearest filtering", tex.region.size == Vector2(68, 68)
+	var meta = JSON.parse_string(FileAccess.get_file_as_string(player.sprite.metadata_path))
+	check("sprite frames match metadata, nearest filtering", tex.region.size == Vector2(meta.frame_width, meta.frame_height)
 		and player.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST, str(tex.region.size))
 
 

@@ -154,6 +154,83 @@
         "west": "completed",
         "south-west": "completed"
       }
+    },
+    "walk_s3": {
+      "animation_group_id": "c1705b7b-8ac9-4e2e-a196-2b2904caa1ea",
+      "jobs": {
+        "east": "f02abc9b-3bfe-4ab2-83dd-31507288c761",
+        "south-east": "c48ec0c9-4813-4cc6-ac5b-765926765611",
+        "south": "f78c4e25-6451-44e6-91f7-e56978002c5c",
+        "south-west": "e01e368d-05b0-48b3-99a5-019708b4f349",
+        "west": "ba61b688-3899-4a4a-aca8-a52a3da566d5",
+        "north-west": "3edea78e-68f2-4fe7-90eb-5423838d5243",
+        "north": "26743bfc-fb97-4b63-8b5f-5d6479996580",
+        "north-east": "5f214495-305f-4735-b6ae-3da9ee13fbe0"
+      },
+      "request": {
+        "animation_name": "walk_s3",
+        "mode": "skeleton-v3",
+        "directions": [
+          "south",
+          "south-west",
+          "west",
+          "north-west",
+          "north",
+          "north-east"
+        ],
+        "action_description": "calm natural walk cycle at a steady pace, upright posture, head level, arms swing gently at the sides, the green cloak hangs down from the shoulders and only sways slightly with each step, no wind, feet stay grounded",
+        "frame_count": 8,
+        "animation_group_id": "c1705b7b-8ac9-4e2e-a196-2b2904caa1ea"
+      },
+      "status": {
+        "east": "completed",
+        "south-east": "completed",
+        "south": "completed",
+        "south-west": "completed",
+        "west": "completed",
+        "north-west": "completed",
+        "north": "completed",
+        "north-east": "completed"
+      }
+    },
+    "run_s3": {
+      "animation_group_id": "e0308119-3ff1-41a4-99a2-89ecf0250c4b",
+      "jobs": {
+        "south": "ec6507fc-03e6-405f-b075-8e0037d5f817",
+        "south-east": "e06e3ee9-ed6f-47bb-a0ff-4a6c1543bba8",
+        "east": "cabe76ed-82ca-4699-a0db-717bc3e6c919",
+        "north-east": "1f94d35f-61d2-4881-8f31-7c4a5a1be999",
+        "north": "62134d8b-4baf-43c1-a7f5-f3385d653acb",
+        "north-west": "626bca35-9524-4c73-859f-25b3bcf32c64",
+        "west": "ed0018a2-3d72-4fa0-ab2f-45945ff70779",
+        "south-west": "7f6e35f7-3586-4598-bcfb-c7b82b5bd3e6"
+      },
+      "request": {
+        "animation_name": "run_s3",
+        "mode": "skeleton-v3",
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ],
+        "action_description": "steady running cycle, body leaning slightly forward, arms pumping at the sides, longer strides with a brief moment where both feet leave the ground, the green cloak trails a little behind and stays close to the body, no wind",
+        "frame_count": 8
+      },
+      "status": {
+        "south": "completed",
+        "south-east": "completed",
+        "east": "completed",
+        "north-east": "completed",
+        "north": "completed",
+        "north-west": "completed",
+        "west": "completed",
+        "south-west": "completed"
+      }
     }
   },
   "tiles": {

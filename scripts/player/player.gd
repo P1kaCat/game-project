@@ -23,7 +23,9 @@ signal interacted
 ## rate without foot sliding (measured from the stride in the frames). The
 ## animation is sped up by speed / reference, so faster movement keeps the
 ## feet planted instead of sliding.
-@export var walk_anim_reference_speed := 50.0
+## (skeleton-v3 cycles: measured stride ~65 % / 75 % of the first versions;
+## walk slightly below its no-slide value so the cadence stays natural.)
+@export var walk_anim_reference_speed := 40.0
 @export var run_anim_reference_speed := 90.0
 ## Ground-space acceleration / braking in px/s². High values feel responsive;
 ## the short ramp only removes the 1-frame start/stop pop.
