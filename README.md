@@ -64,6 +64,9 @@ A store/release build would additionally need a private release keystore
 
 ## NPCs, dialogue and shop
 
+![Dialogue](docs/images/npc_dialogue.png)
+![Shop](docs/images/npc_shop.png)
+
 Eldric, the first NPC, stands next to the central crossroads. Walk up to him:
 a small speech bubble appears; press **E** (PC) or the **A** button (Android).
 
