@@ -10,7 +10,7 @@ config/description="Player character movement test on a 64x32 isometric grid."
 run/main_scene="res://scenes/launcher.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.png"
-config/version="0.4.1"
+config/version="0.4.2"
 
 [autoload]
 

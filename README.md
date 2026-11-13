@@ -162,6 +162,9 @@ travels exactly along the tile edges, slope (2, 1). Movement speeds are walk
 65 px/s and run 150 px/s. The walk/run cycles were calibrated against the
 stride measured in the generated frames (50 / 90 px/s at native frame rate),
 and play proportionally faster at higher speeds, so the feet don't slide.
+On screen, up/down movement runs at 75 % of the left/right speed
+(`Player.vertical_speed`; strict isometric would be 50 %, which feels slow),
+with diagonals still following the 2:1 tile edges.
 
 | Animation | Frames / direction | Frame duration | Engine |
 |---|---|---|---|

@@ -142,6 +142,10 @@ func _test_keyboard_directions() -> void:
 		_release(KEY_DIRS[dir])
 		check("keyboard %s: sprite + walk anim" % dir, anim == "walk_" + dir and player.sprite.is_playing(), anim)
 		check("keyboard %s: ground speed normalised" % dir, absf(speed - player.walk_speed) < 0.01, "%.3f px/s" % speed)
+		var screen_speed := delta.length() / 0.5
+		var expect_screen := player.walk_speed * Iso.screen_speed_factor(expect_dir, player.vertical_speed)
+		check("keyboard %s: on-screen speed" % dir, absf(screen_speed - expect_screen) < 0.5,
+			"%.1f px/s (expected %.1f)" % [screen_speed, expect_screen])
 		check("keyboard %s: screen direction (iso)" % dir, delta.normalized().dot(expect_dir) > 0.9999,
 			"delta=(%.2f,%.2f) expected=(%.3f,%.3f)" % [delta.x, delta.y, expect_dir.x, expect_dir.y])
 		await _wait(0.2)

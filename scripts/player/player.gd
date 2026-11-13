@@ -7,7 +7,7 @@ extends CharacterBody2D
 ## physical position, arrows, gamepad stick, on-screen joystick).
 ##
 ## Movement happens in an undistorted "ground" plane and is projected to the
-## screen with the 2:1 isometric camera (Iso.ground_to_screen), so diagonals run
+## screen with the 2:1 isometric camera (Iso.move_to_screen), so diagonals run
 ## exactly along the 64x32 tile edges and diagonal speed is normalised.
 
 signal facing_changed(dir_code: String)
@@ -16,6 +16,9 @@ signal interacted
 ## Ground-space movement speeds in px/s.
 @export var walk_speed := 65.0
 @export var run_speed := 150.0
+## On-screen speed moving up/down, relative to left/right. 0.5 = strict
+## isometric (up/down look twice as slow), 1.0 = same speed everywhere.
+@export_range(0.5, 1.0) var vertical_speed := 0.75
 ## Speeds at which the PixelLab walk / run cycles play at their native frame
 ## rate without foot sliding (measured from the stride in the frames). The
 ## animation is sped up by speed / reference, so faster movement keeps the
@@ -72,7 +75,7 @@ func _physics_process(delta: float) -> void:
 	var rate := acceleration if target != Vector2.ZERO else braking
 	ground_velocity = ground_velocity.move_toward(target, rate * delta)
 
-	velocity = Iso.ground_to_screen(ground_velocity)
+	velocity = Iso.move_to_screen(ground_velocity, vertical_speed)
 	var start := global_position
 	move_and_slide()
 	if get_slide_collision_count() > 0:
@@ -87,7 +90,7 @@ func _physics_process(delta: float) -> void:
 ## two faces). Measured in ground space so the iso squash doesn't skew angles.
 func _resolve_collision(start: Vector2, delta: float) -> void:
 	var intended := ground_velocity * delta
-	var moved := Iso.screen_to_ground(global_position - start)
+	var moved := Iso.screen_to_move(global_position - start, vertical_speed)
 	if intended.is_zero_approx() or moved.dot(intended.normalized()) < intended.length() * min_slide_progress:
 		global_position = start
 		ground_velocity = Vector2.ZERO
