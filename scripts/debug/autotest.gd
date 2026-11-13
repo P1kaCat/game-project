@@ -66,6 +66,7 @@ func _run() -> void:
 	await _test_idle_and_no_resets()
 	await _test_release_stagger()
 	await _test_run()
+	await _test_sprint_key_mid_walk()
 	await _test_frame_rate_independence()
 	await _test_camera_follow()
 	await _test_collision_blocks()
@@ -80,6 +81,7 @@ func _run() -> void:
 	await _test_joystick_analog_and_deadzone()
 	await _test_joystick_release_and_cancel()
 	await _test_multitouch_action_button()
+	await _test_touch_sprint_button()
 	await _test_touch_outside_ignored()
 	await _test_flicker_resistance()
 	await _test_keyboard_and_touch_coexist()
@@ -300,8 +302,16 @@ func _test_hud_layout() -> void:
 	check("action button bottom-right", b.x > vp.size.x * 0.7 and b.y > vp.size.y * 0.6, str(b))
 	var j_rect := Rect2(j - Vector2.ONE * hud.joystick.base_radius, Vector2.ONE * hud.joystick.base_radius * 2)
 	check("joystick inside safe area", hud.safe_rect.encloses(j_rect), "%s in %s" % [j_rect, hud.safe_rect])
+	var sp := hud.sprint_button.global_center()
+	var sr := hud.sprint_button.radius
+	var sp_rect := Rect2(sp - Vector2.ONE * sr, Vector2.ONE * sr * 2)
+	check("sprint button bottom-right, inside safe area", sp.x > vp.size.x * 0.6 and sp.y > vp.size.y * 0.55
+		and hud.safe_rect.encloses(sp_rect), str(sp))
+	check("sprint and A buttons don't overlap", sp.distance_to(b) > sr + hud.action_button.radius,
+		"distance %.1f" % sp.distance_to(b))
 	var centre := Rect2(vp.size * 0.3, vp.size * 0.4)
-	check("centre of screen unobstructed", not centre.intersects(j_rect) and not centre.has_point(b))
+	check("centre of screen unobstructed", not centre.intersects(j_rect) and not centre.has_point(b)
+		and not centre.intersects(sp_rect))
 	if _shots_dir != "":
 		_capture("hud")
 
@@ -418,6 +428,68 @@ func _test_multitouch_action_button() -> void:
 	check("multitouch: joystick finger still tracked", String(player.sprite.animation) == "walk_n", String(player.sprite.animation))
 	await _touch_up(0, c + Vector2(0, -r * 0.8))
 	await _wait(0.3)
+
+
+func _test_sprint_key_mid_walk() -> void:
+	# Walk, hold Shift while moving, let go: walk -> run -> walk without stopping.
+	world.spawn_player(Vector2i(8, 8))
+	await _wait(0.05)
+	_press([&"move_down"])
+	await _wait(0.4)
+	var a1 := String(player.sprite.animation)
+	var v1 := player.ground_velocity.length()
+	_press([&"run"])
+	await _wait(0.4)
+	var a2 := String(player.sprite.animation)
+	var v2 := player.ground_velocity.length()
+	if _shots_dir != "":
+		_capture("sprint_key")
+	_release([&"run"])
+	await _wait(0.4)
+	var a3 := String(player.sprite.animation)
+	var v3 := player.ground_velocity.length()
+	_release([&"move_down"])
+	await _wait(0.3)
+	check("sprint key: walk -> run anim + speed", a1 == "walk_s" and a2 == "run_s"
+		and absf(v1 - player.walk_speed) < 0.01 and absf(v2 - player.run_speed) < 0.01,
+		"%s %.0f -> %s %.0f" % [a1, v1, a2, v2])
+	check("sprint key released: back to walk", a3 == "walk_s" and absf(v3 - player.walk_speed) < 0.01,
+		"%s %.0f" % [a3, v3])
+	check("sprint key alone (no direction): stays idle", await _shift_alone_is_idle())
+
+
+func _shift_alone_is_idle() -> bool:
+	_press([&"run"])
+	await _wait(0.3)
+	var ok := String(player.sprite.animation).begins_with("idle") and player.ground_velocity == Vector2.ZERO
+	_release([&"run"])
+	return ok
+
+
+func _test_touch_sprint_button() -> void:
+	var c := hud.joystick.global_center()
+	var r := hud.joystick.base_radius
+	var sp := hud.sprint_button.global_center()
+	world.spawn_player(Vector2i(8, 8))
+	await _wait(0.05)
+	await _touch_drag_to(0, c, c + Vector2(r * 0.8, 0))   # finger 0: walk east (not full tilt)
+	await _wait(0.3)
+	var a1 := String(player.sprite.animation)
+	_touch(1, sp, true)                                    # finger 1: hold sprint
+	await _wait(0.4)
+	var a2 := String(player.sprite.animation)
+	var v2 := player.ground_velocity.length()
+	if _shots_dir != "":
+		_capture("sprint_touch")
+	_touch(1, sp, false)
+	await _wait(0.4)
+	var a3 := String(player.sprite.animation)
+	await _touch_up(0, c + Vector2(r * 0.8, 0))
+	await _wait(0.3)
+	check("touch sprint button: run anim at run speed", a1 == "walk_e" and a2 == "run_e"
+		and absf(v2 - player.run_speed) < 0.01, "%s -> %s %.0f" % [a1, a2, v2])
+	check("touch sprint released: back to walk", a3 == "walk_e", a3)
+	check("touch sprint: no interact triggered", not Input.is_action_pressed(&"run"))
 
 
 func _test_touch_outside_ignored() -> void:

@@ -21,7 +21,7 @@ godot --path .            # opens the movement test scene (scenes/main.tscn)
 | Action | PC | Gamepad | Touch (Android) |
 |---|---|---|---|
 | Move (8 directions) | **WASD** on QWERTY = **ZQSD** on AZERTY (physical key positions), arrow keys | left stick | joystick, bottom-left |
-| Run | **Shift** | A | push the joystick to full tilt |
+| Run / sprint | hold **Shift** | A | hold the **>>** button, or push the joystick to full tilt |
 | Interact (placeholder) | **E** / **Space** | X | **A** button, bottom-right |
 
 The touch HUD shows automatically on Android/iOS. On PC it stays hidden, unless
@@ -43,7 +43,7 @@ adb install -r build/android/IsoRPG-debug.apk
 | | Android preset | Windows preset |
 |---|---|---|
 | Output | debug APK, signed with the Android debug key (v2 + v3) | single `.exe`, game data embedded |
-| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.2.0 (code 2) | Iso RPG |
+| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.3.0 (code 3) | Iso RPG |
 | CPU | **arm64-v8a** only | x86_64 |
 | Orientation | landscape (`userLandscape`), immersive, edge-to-edge (safe area handled in-game) | 1440 × 810 window, resizable |
 | Permissions | **none** | n/a |

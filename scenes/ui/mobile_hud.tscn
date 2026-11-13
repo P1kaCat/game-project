@@ -24,3 +24,11 @@ layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("3_button")
+
+[node name="SprintButton" type="Control" parent="Root"]
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+script = ExtResource("3_button")
+action = &"run"
+label = ">>"

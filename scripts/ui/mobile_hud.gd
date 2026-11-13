@@ -1,6 +1,6 @@
 class_name MobileHUD
 extends CanvasLayer
-## Touch HUD: joystick bottom-left, action button bottom-right.
+## Touch HUD: joystick bottom-left, action (A) and sprint (>>) buttons bottom-right.
 ##
 ## * Shown only when GameInput.touch_ui_enabled (Android/iOS, `--touch-ui`, or
 ##   after a real touch on a touchscreen PC). Hidden on PC by default.
@@ -17,6 +17,8 @@ extends CanvasLayer
 @onready var root: Control = $Root
 @onready var joystick: TouchJoystick = $Root/Joystick
 @onready var action_button: TouchActionButton = $Root/ActionButton
+## Hold to sprint (drives the "run" action, same as Shift on PC).
+@onready var sprint_button: TouchActionButton = $Root/SprintButton
 
 var safe_rect := Rect2()  # in viewport coordinates, for tests/debug
 var _fake_insets := Vector4.ZERO
@@ -91,3 +93,8 @@ func _layout() -> void:
 	var b_center := Vector2(safe_rect.end.x - margin - b - r * 0.25,
 		safe_rect.end.y - margin - b - r * 0.35)
 	action_button.position = (b_center - action_button.size / 2.0).round()
+
+	# Sprint: up-left of A, on the arc a right thumb sweeps naturally.
+	sprint_button.radius = action_button.radius
+	var s_center := b_center + Vector2(-b * 2.3, -b * 0.9)
+	sprint_button.position = (s_center - sprint_button.size / 2.0).round()
