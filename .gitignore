@@ -7,3 +7,5 @@ export/
 tools/pixellab/__pycache__/
 /screenshots/tmp/
 build/
+*.keystore
+*.jks

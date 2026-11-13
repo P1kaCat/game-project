@@ -43,10 +43,10 @@ adb install -r build/android/IsoRPG-debug.apk
 | | Android preset | Windows preset |
 |---|---|---|
 | Output | debug APK, signed with the Android debug key (v2 + v3) | single `.exe`, game data embedded |
-| Package / name | `com.p1kacat.isorpg`, "Iso RPG", v0.3.1 (code 4) | Iso RPG |
+| Package / name | `com.p1kacat.isorpg`, "Iso RPG", version from `set_version.py` | Iso RPG |
 | CPU | **arm64-v8a** only | x86_64 |
 | Orientation | landscape (`userLandscape`), immersive, edge-to-edge (safe area handled in-game) | 1440 × 810 window, resizable |
-| Permissions | **none** | n/a |
+| Permissions | **INTERNET** only (update check) | n/a |
 
 **Android toolchain** (one-time; this is what the build machine used):
 - Godot 4.7 export templates in `~/.local/share/godot/export_templates/4.7.stable/`
@@ -61,6 +61,46 @@ adb install -r build/android/IsoRPG-debug.apk
 
 A store/release build would additionally need a private release keystore
 (`keystore/release*` in the preset, or `GODOT_ANDROID_KEYSTORE_RELEASE_*` env vars).
+
+## Updates (launcher + GitHub Releases)
+
+The exe / APK start on a small **launcher** (`scenes/launcher.tscn`) that
+checks the latest GitHub Release before the game starts:
+
+| Release changes… | What the launcher does |
+|---|---|
+| game content only (scenes, gameplay scripts, sprites, new classes…) | downloads `game-<platform>.pck` (~0.4 MB), checks its SHA-256, **hot-loads it and starts the game: no restart, no reinstall** (PC and Android) |
+| the "base" (engine/project settings, input map, autoloads, export settings, launcher) | full update: Windows downloads `IsoRPG-windows.zip`, swaps `IsoRPG.exe` and restarts once; Android offers the new APK (or "play anyway") |
+| nothing / offline / GitHub down | starts the game immediately (with the last downloaded content) |
+
+`tools/release/set_version.py` writes `build_info.json` with the version and
+the **base_id** (a hash of the base files, version numbers excluded). The
+launcher compares it with the release's `manifest.json` to decide between
+the two update kinds. Downloaded content is cached in `user://content/`.
+
+**Publishing a version**
+
+```sh
+git tag v0.4.1 && git push origin v0.4.1
+```
+
+`.github/workflows/release.yml` then sets the version from the tag, builds
+with `tools/release/build.sh` and publishes `manifest.json`,
+`game-windows.pck`, `game-android.pck`, `IsoRPG-windows.zip` and `IsoRPG.apk`.
+
+**One-time GitHub setup**
+1. The repository must be **public** (the game reads releases without
+   credentials).
+2. Repository secret **`ANDROID_DEBUG_KEYSTORE_BASE64`** = the Android
+   signing keystore, base64-encoded (`base64 -w0 debug.keystore`). Every APK
+   must be signed with the same key, or Android refuses to install it over
+   the previous one. Never commit the keystore (`*.keystore` is git-ignored).
+
+**Testing the launcher** (no GitHub needed): serve a fake
+`/repos/P1kaCat/game-project/releases/latest` and run
+`godot --main-pack IsoRPG.exe -- --autotest --launcher-only --check-updates
+--update-api-base=http://127.0.0.1:PORT --update-platform=windows
+--expect-launcher=updated --expect-content-version=X.Y.Z`.
 
 ## Testing
 
@@ -168,6 +208,8 @@ scripts/world/iso_obstacles.gd        raised solid blocks (y-sorted with charact
 scripts/ui/touch_joystick.gd          analog stick: dead zone, multitouch, cancel, auto-centre
 scripts/ui/touch_action_button.gd     round touch button -> InputMap action ("interact")
 scripts/ui/mobile_hud.gd              HUD visibility, density-aware sizing, safe-area layout
+scripts/launcher/launcher.gd          entry scene: update check, pack hot-load, full update
+scripts/launcher/update_service.gd    GitHub Releases client, download, exe swap
 scripts/debug/autotest.gd             scripted runtime verification
 ```
 

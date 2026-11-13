@@ -5,6 +5,8 @@ extends Node
 ## in window coordinates, exactly like the OS delivers them).
 ##
 ## Run:  godot --path . -- --autotest [--shots=/abs/dir] [--frames] [--layout-only]
+##       godot ... -- --autotest --launcher-only --expect-launcher=STATUS
+##             [--expect-content-version=X.Y.Z] [--check-updates --update-api-base=URL ...]
 ## Prints one CHECK line per assertion and a final SUMMARY; exit code 0 = pass.
 
 var world: Node
@@ -51,6 +53,11 @@ func _physics_process(_delta: float) -> void:
 # --------------------------------------------------------------------- runner
 func _run() -> void:
 	await _wait(0.4)
+	if "--launcher-only" in OS.get_cmdline_user_args():
+		await _run_launcher_checks()
+		print("SUMMARY %s (%d checks, %d failures)" % ["PASS" if _failures == 0 else "FAIL", _checks, _failures])
+		get_tree().quit(1 if _failures else 0)
+		return
 	if "--layout-only" in OS.get_cmdline_user_args():
 		# Touch HUD layout check for the current window size / fake safe area.
 		GameInput.touch_ui_enabled = true
@@ -566,6 +573,35 @@ func _test_assets_preserved() -> void:
 	check("sprite frames 68x68, nearest filtering", tex.region.size == Vector2(68, 68)
 		and player.sprite.texture_filter == CanvasItem.TEXTURE_FILTER_NEAREST, str(tex.region.size))
 
+
+# ------------------------------------------------------------ launcher test
+func _arg(prefix: String) -> String:
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with(prefix):
+			return a.trim_prefix(prefix)
+	return ""
+
+
+## Checks what the launcher did before this scene started (see launcher.gd).
+func _run_launcher_checks() -> void:
+	var res: Dictionary = Engine.get_meta(&"launcher_result", {})
+	var expect := _arg("--expect-launcher=")
+	check("launcher: result '%s'" % expect, str(res.get("status", "")) == expect, str(res))
+	var ev := _arg("--expect-content-version=")
+	if ev != "":
+		var running := str(Engine.get_meta(&"content_version", ""))
+		var info = JSON.parse_string(FileAccess.get_file_as_string("res://build_info.json"))
+		check("launcher: game runs content v%s" % ev, running == ev and info.version == ev,
+			"meta=%s build_info=%s" % [running, info.version])
+	var ws := _arg("--expect-walk-speed=")
+	if ws != "":
+		check("launcher: updated gameplay code active (walk_speed)", is_equal_approx(player.walk_speed, ws.to_float()),
+			"walk_speed=%.1f" % player.walk_speed)
+	var label: Label = world.find_child("VersionLabel", true, false)
+	check("in-game version label", label != null and label.text == "v" + str(Engine.get_meta(&"content_version", "")),
+		label.text if label else "missing")
+	if _shots_dir != "":
+		_capture("game_after_launcher")
 
 # ------------------------------------------------------------------ helpers
 func _press(actions: Array) -> void:
