@@ -112,9 +112,10 @@ against the map outline and raised blocks; a blocked push that would only
 jitter (head-on or in an inside corner) stops cleanly instead.
 `Iso.ground_to_screen()` halves the vertical component (the 2:1 camera). This
 keeps diagonal speed normalised in ground space, and moving diagonally
-travels exactly along the tile edges, slope (2, 1). Speeds (walk 65 px/s, run 150 px/s; animation sped up to match from the stride-calibrated 50 / 90 px/s,
-run 90 px/s) were calibrated against the stride measured in the generated
-frames, so the feet don't slide.
+travels exactly along the tile edges, slope (2, 1). Movement speeds are walk
+65 px/s and run 150 px/s. The walk/run cycles were calibrated against the
+stride measured in the generated frames (50 / 90 px/s at native frame rate),
+and play proportionally faster at higher speeds, so the feet don't slide.
 
 | Animation | Frames / direction | Frame duration | Engine |
 |---|---|---|---|
