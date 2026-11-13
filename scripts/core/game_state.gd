@@ -33,9 +33,17 @@ static func new_game() -> void:
 ## Story already seen: used by automated tests and debugging.
 static func setup_sandbox() -> void:
 	new_game()
-	flags = {"intro_seen": true, "awakened": true, "eldric_intro_done": true}
+	flags = {"intro_seen": true, "awakened": true, "entered_main_game": true, "eldric_intro_done": true}
 	awakening_pending = false
 	sandbox = true
+
+
+## The opening cinematic was watched or skipped: both lead to the same state.
+## The game itself starts ten years later, near Eldric's camp.
+static func complete_intro() -> void:
+	flags["intro_seen"] = true
+	awakening_pending = true
+	has_position = false
 
 
 static func to_dict() -> Dictionary:

@@ -1,42 +1,59 @@
 extends Control
-## Opening cinematic ("L'Inscriptible"), built from layered pixel-art
-## illustrations, never a video. Everything it shows comes from
-## data/story/intro.json (localized as intro.<locale>.json): per scene an
-## illustration shown 1:1 inside letterbox bars with a slow vertical pan,
-## dithered fog / motes for depth, and timed beats (narration, the voice of
-## the authority, silences, flash, portrait, sounds, the title).
+## Opening cinematic, built from layered pixel-art illustrations (never a
+## video). All content comes from data/story/intro.json (localized as
+## intro.<locale>.json); this script only knows how to present it:
+##
+##   scene: {image, pan: [from, to] (0 = top of the art, 1 = bottom), pan_delay,
+##           fade_in, fade_in_color, fade_out_color, fog, motes, ambience, beats}
+##   beat:  {line, speaker}   subtitle (speaker styles in "speakers")
+##          {wait}            silence (seconds)
+##          {sfx} {shake} {flash}
+##          {crossfade: {image, time}}         same framing, changed art
+##          {runes: {center, radius, count, speed, fade}} / {runes_off: t}
+##          {dim: {amount, time}}             slow darkening
+##          {fade_out: t}                     to black, mid-scene
+##          {title: {image, hold}} {caption: {text, hold}}   on black
+##
+## Unified framing: every illustration is ART_SIZE pixels, shown 1:1 inside the
+## same letterbox on black, whatever the screen. No dialogue portraits here:
+## speech is subtitled.
 ##
 ## Input: a short press (tap / click / Enter) advances the current line;
-## holding for HOLD_TO_SKIP seconds skips the whole sequence. Either way the
-## game state is initialized the same (intro_seen, awakening pending) and the
-## game continues in the starting area.
+## holding HOLD_TO_SKIP seconds skips everything. Watching or skipping leads
+## to the same story state.
 
 signal finished(skipped: bool)
 
 const DATA := "res://data/story/intro.json"
 const WORLD_SCENE := "res://scenes/main.tscn"
+const ART_SIZE := Vector2(480, 254)
 const HOLD_TO_SKIP := 1.2
 const BAR_TOP := 22.0
 const BAR_BOTTOM := 40.0
-const VOICE_COLOR := Color(0.72, 0.78, 0.88)
 
 var skipped := false
 var done := false
 var current_scene := -1
 var current_line := ""
+var current_speaker := ""
 var lines_shown := 0
+var lines_log: Array[String] = []
 
 var _data := {}
+var _speakers := {}
 var _image: TextureRect
+var _image_b: TextureRect
+var _runes: RuneRing
+var _dim: ColorRect
 var _fog_layers: Array[Control] = []
 var _motes: CPUParticles2D
-var _portrait: Control
 var _bars: Array[ColorRect] = []
 var _subtitle: Label
-var _fade: ColorRect
 var _flash: ColorRect
 var _title: TextureRect
-var _skip_hint: Control
+var _caption: Label
+var _fade: ColorRect
+var _skip_hint: SkipHint
 var _pan := 0.0
 var _pan_tween: Tween
 var _shake := 0.0
@@ -52,6 +69,7 @@ func _ready() -> void:
 	theme = UITheme.get_theme()
 	var raw = JSON.parse_string(FileAccess.get_file_as_string(Loc.localized_path(DATA)))
 	_data = raw if raw is Dictionary else {}
+	_speakers = _data.get("speakers", {})
 	_build()
 	get_viewport().size_changed.connect(_layout)
 	_layout()
@@ -65,13 +83,15 @@ func _build() -> void:
 	bg.color = Color.BLACK
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
-	_image = TextureRect.new()
-	_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_image)
-	_portrait = Control.new()
-	_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_portrait.visible = false
-	add_child(_portrait)
+	_image = _art_rect()
+	_image_b = _art_rect()
+	_image_b.modulate.a = 0.0
+	_runes = RuneRing.new()
+	add_child(_runes)
+	_dim = ColorRect.new()
+	_dim.color = Color(0, 0, 0, 0)
+	_dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_dim)
 	for i in 2:
 		var b := ColorRect.new()
 		b.color = Color.BLACK
@@ -89,19 +109,33 @@ func _build() -> void:
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_flash)
-	_title = TextureRect.new()
-	_title.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_title.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_title.modulate.a = 0.0
-	add_child(_title)
 	_fade = ColorRect.new()
 	_fade.color = Color.BLACK
 	_fade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_fade)
+	_title = TextureRect.new()
+	_title.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_title.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_title.modulate.a = 0.0
+	add_child(_title)
+	_caption = Label.new()
+	_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_caption.add_theme_color_override("font_color", UITheme.TEXT)
+	_caption.add_theme_font_size_override("font_size", UITheme.TITLE_FONT_SIZE)
+	_caption.modulate.a = 0.0
+	add_child(_caption)
 	_skip_hint = SkipHint.new()
 	_skip_hint.modulate.a = 0.0
 	add_child(_skip_hint)
+
+
+func _art_rect() -> TextureRect:
+	var t := TextureRect.new()
+	t.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	t.size = ART_SIZE
+	add_child(t)
+	return t
 
 
 func _window() -> Rect2:
@@ -117,6 +151,8 @@ func _layout() -> void:
 	_bars[0].size = Vector2(vp.x, BAR_TOP)
 	_bars[1].position = Vector2(0, win.end.y)
 	_bars[1].size = Vector2(vp.x, BAR_BOTTOM)
+	_dim.position = win.position
+	_dim.size = win.size
 	_subtitle.size = Vector2(minf(440.0, safe.size.x - 24), BAR_BOTTOM - 4)
 	_subtitle.position = Vector2((vp.x - _subtitle.size.x) / 2.0, win.end.y + 2).round()
 	for f in _fog_layers:
@@ -124,32 +160,36 @@ func _layout() -> void:
 	if _title.texture:
 		_title.size = _title.texture.get_size() * 2
 		_title.position = ((vp - _title.size) / 2.0).round()
+	_caption.size = Vector2(vp.x, 16)
+	_caption.position = Vector2(0, roundf(vp.y / 2.0 - 8))
 	_skip_hint.position = Vector2(safe.end.x - 104, safe.position.y + 4).round()
 	_skip_hint.size = Vector2(100, 16)
-	_place_image()
 	if _motes:
 		_motes.position = win.get_center()
 		_motes.emission_rect_extents = win.size / 2.0
+	_place_art()
 
 
-func _place_image() -> void:
-	if _image.texture == null:
-		return
+## Art origin on screen (top-left of the ART_SIZE illustration).
+func _art_origin() -> Vector2:
 	var win := _window()
-	var s := _image.texture.get_size()
-	_image.size = s
-	var travel := maxf(0.0, s.y - win.size.y)
+	var travel := maxf(0.0, ART_SIZE.y - win.size.y)
 	var shake := Vector2(randf_range(-_shake, _shake), randf_range(-_shake, _shake)) if _shake > 0.0 else Vector2.ZERO
-	_image.position = (Vector2((win.size.x - s.x) / 2.0, win.position.y - travel * _pan) + shake).round()
-	if _portrait.visible:
-		_portrait.position = Vector2(roundf(win.position.x + win.size.x / 2.0 + 60), roundf(win.position.y + (win.size.y - 136) / 2.0))
+	return (Vector2((win.size.x - ART_SIZE.x) / 2.0, win.position.y - travel * _pan) + shake).round()
+
+
+func _place_art() -> void:
+	var o := _art_origin()
+	_image.position = o
+	_image_b.position = o
+	_runes.position = o
+	_runes.size = ART_SIZE
 
 
 func _process(delta: float) -> void:
 	if _shake > 0.0:
 		_shake = maxf(0.0, _shake - delta * 6.0)
-	_place_image()
-	# hold-to-skip / tap-to-advance
+	_place_art()
 	var held := _pointer_down or Input.is_action_pressed(&"ui_accept") or Input.is_action_pressed(&"interact") \
 		or Input.is_action_pressed(&"ui_cancel")
 	if held and not done:
@@ -167,7 +207,7 @@ func _process(delta: float) -> void:
 		_hold = 0.0
 		_hint_t = maxf(0.0, _hint_t - delta)
 	_skip_hint.modulate.a = move_toward(_skip_hint.modulate.a, 1.0 if _hint_t > 0.0 and not done else 0.0, delta * 4.0)
-	(_skip_hint as SkipHint).progress = clampf(_hold / HOLD_TO_SKIP, 0.0, 1.0)
+	_skip_hint.progress = clampf(_hold / HOLD_TO_SKIP, 0.0, 1.0)
 
 
 func _input(event: InputEvent) -> void:
@@ -194,11 +234,11 @@ func _run() -> void:
 
 
 func _play_scene(sc: Dictionary) -> void:
-	var tex: Texture2D = load(str(sc.image))
-	_image.texture = Atmosphere.dither_edges(tex, 10)
-	_portrait.visible = false
-	for c in _portrait.get_children():
-		c.queue_free()
+	_set_art(_image, str(sc.image))
+	_image.modulate.a = 1.0
+	_image_b.modulate.a = 0.0
+	_runes.intensity = 0.0
+	_dim.color.a = 0.0
 	_set_atmosphere(str(sc.get("fog", "none")), str(sc.get("motes", "")))
 	if sc.has("ambience"):
 		Audio.ambience(str(sc.ambience), 2.0, -6.0)
@@ -211,10 +251,9 @@ func _play_scene(sc: Dictionary) -> void:
 	_pan_tween.tween_interval(float(sc.get("pan_delay", 0.0)))
 	_pan_tween.tween_property(self, "_pan", float(pan[1]), maxf(4.0, _estimate(sc) - float(sc.get("pan_delay", 0.0)))) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	# fade in from black / white
 	_fade.color = Color.WHITE if sc.get("fade_in_color", "") == "white" else Color.BLACK
 	_fade.color.a = 1.0
-	await _tween_alpha(_fade, 0.0, float(sc.get("fade_in", 1.5)))
+	await _tween(_fade, "color:a", 0.0, float(sc.get("fade_in", 1.5)))
 	for beat: Dictionary in sc.get("beats", []):
 		if skipped:
 			return
@@ -222,9 +261,10 @@ func _play_scene(sc: Dictionary) -> void:
 	if skipped:
 		return
 	await _hide_subtitle()
-	_fade.color = Color.WHITE if sc.get("fade_out_color", "") == "white" else Color.BLACK
-	_fade.color.a = 0.0
-	await _tween_alpha(_fade, 1.0, 1.6 if sc.get("fade_out_color", "") == "white" else 1.2)
+	if _fade.color.a < 1.0:
+		var white: bool = sc.get("fade_out_color", "") == "white"
+		_fade.color = Color(Color.WHITE if white else Color.BLACK, _fade.color.a)
+		await _tween(_fade, "color:a", 1.0, 1.6 if white else 1.2)
 
 
 func _beat(b: Dictionary) -> void:
@@ -235,67 +275,84 @@ func _beat(b: Dictionary) -> void:
 	if b.has("flash"):
 		_flash.color.a = 0.9
 		create_tween().tween_property(_flash, "color:a", 0.0, float(b.flash))
-	if b.has("portrait"):
-		_show_portrait(load(str(b.portrait)))
-	if b.has("say"):
-		await _line(str(b.say), false)
-	elif b.has("voice"):
-		await _line(str(b.voice), true)
-	elif b.has("title"):
-		await _show_title(load(str(b.title)), float(b.get("hold", 3.0)))
+	if b.has("crossfade"):
+		var cf: Dictionary = b.crossfade
+		_set_art(_image_b, str(cf.image))
+		create_tween().tween_property(_image_b, "modulate:a", 1.0, float(cf.get("time", 2.0)))
+	if b.has("runes"):
+		var r: Dictionary = b.runes
+		_runes.center = Vector2(r.center[0], r.center[1])
+		_runes.radius = Vector2(r.radius[0], r.radius[1])
+		_runes.count = int(r.get("count", 18))
+		_runes.speed = float(r.get("speed", 0.05))
+		create_tween().tween_property(_runes, "intensity", float(r.get("intensity", 1.0)), float(r.get("fade", 2.0)))
+	if b.has("runes_off"):
+		create_tween().tween_property(_runes, "intensity", 0.0, float(b.runes_off))
+	if b.has("dim"):
+		create_tween().tween_property(_dim, "color:a", float(b.dim.amount), float(b.dim.get("time", 4.0)))
+	if b.has("line") or b.has("say") or b.has("voice"):
+		var speaker := str(b.get("speaker", "authority" if b.has("voice") else "narrator"))
+		await _line(str(b.get("line", b.get("say", b.get("voice", "")))), speaker)
+	if b.has("fade_out"):
+		await _hide_subtitle()
+		_fade.color = Color(0, 0, 0, _fade.color.a)
+		await _tween(_fade, "color:a", 1.0, float(b.fade_out))
+	if b.has("title"):
+		await _show_title(load(str(b.title.image)), float(b.title.get("hold", 3.0)))
+	if b.has("caption"):
+		await _show_caption(str(b.caption.text), float(b.caption.get("hold", 3.0)))
 	if b.has("wait"):
 		await _wait(float(b.wait), false)
 
 
-func _line(text: String, voice: bool) -> void:
+func _line(text: String, speaker: String) -> void:
 	await _hide_subtitle()
 	if skipped:
 		return
+	var style: Dictionary = _speakers.get(speaker, {})
 	current_line = text
+	current_speaker = speaker
 	lines_shown += 1
-	_subtitle.text = ("« %s »" % text) if voice else text
-	_subtitle.add_theme_color_override("font_color", VOICE_COLOR if voice else UITheme.TEXT)
+	lines_log.append(text)
+	_subtitle.text = ("« %s »" % text) if style.get("quotes", false) else text
+	_subtitle.add_theme_color_override("font_color", Color.html(str(style.get("color", "#e8dec4"))))
 	_advance = false
-	await _tween_alpha(_subtitle, 1.0, 0.4)
+	await _tween(_subtitle, "modulate:a", 1.0, 0.4)
 	# reading time: ~15 characters / second, never rushed
 	await _wait(clampf(1.4 + text.length() * 0.06, 2.4, 6.5), true)
 
 
 func _hide_subtitle() -> void:
 	if _subtitle.modulate.a > 0.0:
-		await _tween_alpha(_subtitle, 0.0, 0.3)
+		await _tween(_subtitle, "modulate:a", 0.0, 0.3)
 		await _wait(0.2, false)
-
-
-func _show_portrait(tex: Texture2D) -> void:
-	var frame := NinePatchRect.new()
-	frame.texture = load("res://assets/ui/portrait_frame.png")
-	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
-		frame.set_patch_margin(side, 8)
-	frame.size = Vector2(136, 136)
-	var pic := TextureRect.new()
-	pic.texture = tex
-	pic.position = Vector2(4, 4)
-	pic.size = Vector2(128, 128)
-	_portrait.add_child(pic)
-	_portrait.add_child(frame)
-	_portrait.visible = true
-	_portrait.modulate.a = 0.0
-	_place_image()
-	create_tween().tween_property(_portrait, "modulate:a", 1.0, 1.4)
 
 
 func _show_title(tex: Texture2D, hold: float) -> void:
 	await _hide_subtitle()
 	_title.texture = tex
 	_layout()
-	var tw := create_tween()
-	tw.tween_property(_title, "modulate:a", 1.0, 1.8).set_trans(Tween.TRANS_SINE)
-	await tw.finished
+	_title.move_to_front()
+	await _tween(_title, "modulate:a", 1.0, 1.8)
 	await _wait(hold, false)
-	_fade.color = Color(0, 0, 0, 0)
-	_fade.move_to_front()
-	await _tween_alpha(_fade, 1.0, 1.6)
+	await _tween(_title, "modulate:a", 0.0, 1.2)
+
+
+func _show_caption(text: String, hold: float) -> void:
+	_caption.text = text
+	_caption.move_to_front()
+	current_line = text
+	await _tween(_caption, "modulate:a", 1.0, 1.2)
+	await _wait(hold, false)
+	await _tween(_caption, "modulate:a", 0.0, 1.2)
+
+
+func _set_art(rect: TextureRect, path: String) -> void:
+	var tex: Texture2D = load(path)
+	if tex and Vector2(tex.get_size()) != ART_SIZE:
+		push_warning("Cinematic art %s is %s, expected %s" % [path, tex.get_size(), ART_SIZE])
+	rect.texture = Atmosphere.dither_edges(tex, 10) if tex else null
+	rect.size = ART_SIZE
 
 
 func _set_atmosphere(fog: String, motes: String) -> void:
@@ -319,7 +376,7 @@ func _set_atmosphere(fog: String, motes: String) -> void:
 			_motes.initial_velocity_min = 10.0
 			_motes.initial_velocity_max = 26.0
 		add_child(_motes)
-		move_child(_motes, _image.get_index() + 1)
+		move_child(_motes, _dim.get_index())
 
 
 func _add_fog(tex: Texture2D, speed: float, y: float) -> void:
@@ -328,7 +385,7 @@ func _add_fog(tex: Texture2D, speed: float, y: float) -> void:
 	f.position = Vector2(0, roundf(y))
 	f.size = Vector2(get_viewport().get_visible_rect().size.x, tex.get_height())
 	add_child(f)
-	move_child(f, _image.get_index() + 1)
+	move_child(f, _dim.get_index())
 	_fog_layers.append(f)
 
 
@@ -336,19 +393,16 @@ func _add_fog(tex: Texture2D, speed: float, y: float) -> void:
 func _estimate(sc: Dictionary) -> float:
 	var t := float(sc.get("fade_in", 1.5)) + 1.2
 	for b: Dictionary in sc.get("beats", []):
-		t += float(b.get("wait", 0.0)) + float(b.get("hold", 0.0))
-		var text := str(b.get("say", b.get("voice", "")))
+		t += float(b.get("wait", 0.0))
+		var text := str(b.get("line", b.get("say", b.get("voice", ""))))
 		if text != "":
 			t += clampf(1.4 + text.length() * 0.06, 2.4, 6.5) + 0.9
 	return t
 
 
-func _tween_alpha(node: CanvasItem, a: float, t: float) -> void:
+func _tween(node: Object, prop: String, value: float, t: float) -> void:
 	var tw := create_tween()
-	if node is ColorRect:
-		tw.tween_property(node, "color:a", a, t)
-	else:
-		tw.tween_property(node, "modulate:a", a, t)
+	tw.tween_property(node, prop, value, t)
 	while tw.is_running() and not skipped:
 		await get_tree().process_frame
 
@@ -379,9 +433,7 @@ func _finish(was_skipped: bool) -> void:
 	done = true
 	if _pan_tween:
 		_pan_tween.kill()
-	GameState.flags["intro_seen"] = true
-	GameState.awakening_pending = true
-	GameState.has_position = false
+	GameState.complete_intro()
 	finished.emit(was_skipped)
 	Audio.ambience("", 1.0)
 	SceneFade.go(get_tree(), WORLD_SCENE, 0.8 if was_skipped else 0.01, 1.4)
@@ -389,29 +441,3 @@ func _finish(was_skipped: bool) -> void:
 
 func _notification(what: int) -> void:
 	MenuKit.forward_back_button(what)
-
-
-## "Maintenir pour passer" with a pixel ring that fills while held.
-class SkipHint extends Control:
-	var progress := 0.0:
-		set(v):
-			if v != progress:
-				progress = v
-				queue_redraw()
-
-	func _init() -> void:
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	func _draw() -> void:
-		var font := get_theme_default_font()
-		var text := Loc.t("cinematic.hold_to_skip")
-		var fs := UITheme.small_font_size()
-		var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var c := Vector2(size.x - 7, 8)
-		draw_string(font, Vector2(size.x - 16 - w, 11), text, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(UITheme.TEXT, 0.8))
-		# 24-segment ring, radius 5: silver track, brass fill
-		for i in 24:
-			var a := -PI / 2.0 + TAU * i / 24.0
-			var p := (c + Vector2(cos(a), sin(a)) * 5.0).round()
-			var on := float(i) / 24.0 < progress
-			draw_rect(Rect2(p, Vector2.ONE), UITheme.GOLD if on else Color(UITheme.SILVER, 0.35))

@@ -27,13 +27,16 @@ signal closed
 @export var choice_arm_delay := 0.2
 
 const BOX_HEIGHT := 88
-## Portraits are 128 px pixel art shown 1:1 as a bust standing on the box's
-## left edge (it rises above the box), never resampled.
-const PORTRAIT := 128
+## Portraits are pixel art shown 1:1 (never resampled) as a bust standing on
+## the box's left edge (it rises above the box). Optional framing next to the
+## image, <portrait>.json: {"bust": [x, y, w, h], "face": [x, y, w, h]}
+## (default: whole image / a 72 px square near the top centre).
+const PORTRAIT := 128            # default bust size when no framing file exists
 ## Narrow screens (4:3 tablets...): the face is cropped 1:1 to fit inside the box.
 const COMPACT_PORTRAIT := 72
-const COMPACT_WIDTH := 420.0
+const COMPACT_WIDTH := 470.0  # below this, bust + choices + world do not fit side by side
 const FACE_CROP := Rect2(28, 6, 72, 72)
+static var _framing_cache := {}
 const MARGIN := 6
 
 var manager: DialogueManager
@@ -179,15 +182,15 @@ func _layout() -> void:
 	_box.position = Vector2(safe.position.x + MARGIN, safe.end.y - MARGIN - box_h).round()
 	_box.size = Vector2(safe.size.x - 2 * MARGIN, box_h).round()
 	_arrow.position = _box.position + _box.size - Vector2(18, 14)
-	var compact := _box.size.x + 2 * MARGIN < COMPACT_WIDTH
-	if compact != _compact or _portrait_holder.size.x != _portrait_size() + 8:
+	var compact := _box.size.x + 2 * MARGIN < COMPACT_WIDTH * UITheme.ui_scale
+	if compact != _compact or _portrait_holder.size != _bust_rect().size + Vector2(8, 8):
 		_compact = compact
 		_apply_portrait_size()
 	if _compact:
 		_portrait_holder.position = Vector2(_box.position.x + 6, _box.position.y + (_box.size.y - _portrait_holder.size.y) / 2.0).round()
 	else:
 		# Bust: bottom of the frame sits on the box's bottom border, left-aligned.
-		_portrait_holder.position = Vector2(_box.position.x + 2, _box.position.y + _box.size.y - PORTRAIT - 8 - 2).round()
+		_portrait_holder.position = Vector2(_box.position.x + 2, _box.position.y + _box.size.y - _portrait_holder.size.y - 2).round()
 	if _choices_panel.visible:
 		_layout_choices()
 
@@ -209,12 +212,31 @@ func _layout_choices() -> void:
 	_update_cursor()
 
 
-func _portrait_size() -> int:
-	return COMPACT_PORTRAIT if _compact else PORTRAIT
+## Region of the portrait texture shown (bust, or face when compact).
+func _bust_rect() -> Rect2:
+	if _portrait_src == null:
+		return Rect2(0, 0, PORTRAIT, PORTRAIT)
+	var f := _framing(_portrait_src)
+	return f.face if _compact else f.bust
+
+
+static func _framing(tex: Texture2D) -> Dictionary:
+	var path := tex.resource_path
+	if _framing_cache.has(path):
+		return _framing_cache[path]
+	var size := tex.get_size()
+	var f := {"bust": Rect2(Vector2.ZERO, size), "face": FACE_CROP}
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path.get_basename() + ".json")) if path != "" else null
+	if data is Dictionary:
+		for k in ["bust", "face"]:
+			if data.get(k) is Array and data[k].size() == 4:
+				f[k] = Rect2(data[k][0], data[k][1], data[k][2], data[k][3])
+	_framing_cache[path] = f
+	return f
 
 
 func _apply_portrait_size() -> void:
-	var p := Vector2.ONE * _portrait_size()
+	var p := _bust_rect().size
 	_portrait_holder.size = p + Vector2(8, 8)
 	_portrait_bg.size = p
 	_portrait.size = p
@@ -224,12 +246,16 @@ func _apply_portrait_size() -> void:
 
 
 func _set_portrait_texture() -> void:
-	if _portrait_src == null or not _compact:
+	if _portrait_src == null:
+		_portrait.texture = null
+		return
+	var r := _bust_rect()
+	if r == Rect2(Vector2.ZERO, _portrait_src.get_size()):
 		_portrait.texture = _portrait_src
 		return
 	var a := AtlasTexture.new()
 	a.atlas = _portrait_src
-	a.region = FACE_CROP
+	a.region = r
 	_portrait.texture = a
 
 
@@ -300,10 +326,12 @@ func _on_step(step: Dictionary) -> void:
 	open()
 	_step = step
 	_name.text = str(step.get("name", ""))
+	_name.visible = _name.text != ""
 	_name.add_theme_color_override("font_color", UITheme.SILVER if step.get("speaker", "") == "player" else UITheme.GOLD)
 	var tex: Texture2D = step.get("portrait")
 	_portrait_src = tex
-	_set_portrait_texture()
+	_apply_portrait_size()
+	_layout()
 	_portrait_holder.visible = tex != null
 	_text_spacer.visible = tex != null
 	chars_per_second = Settings.text_cps()

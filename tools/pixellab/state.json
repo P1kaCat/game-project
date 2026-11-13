@@ -700,6 +700,419 @@
         "source_image": "south.png",
         "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/eld2/portrait_128.png"
       }
+    },
+    "eldric3": {
+      "character_id": "aa61a1d2-4d66-4ff5-8a06-6eac1b9ad02a",
+      "character_job": "67a630dc-4e0e-4011-8ac9-fd5002a448f8",
+      "character_request": {
+        "description": "full-body medieval dark fantasy travelling merchant, man about 50 years old, sturdy slightly broad frame but not muscular, realistic proportions, not chibi, weathered warm face with smile lines, warm hazel eyes, expressive eyebrows, small scar near one eyebrow, dark chestnut-brown medium-length hair loosely swept back with a few gray strands, short slightly unkempt chestnut beard; knee-length layered merchant coat of dark moss-green wool with weathered brown leather panels, asymmetrical front opening, wide folded collar, small antique-brass fasteners, stitched seams; muted burgundy tunic with a cream undershirt at the neckline; dark brown leather waistcoat; leather belt with small coin pouches, a ring of old iron keys and a small leather ledger; leather satchel at the hip with two tiny glass potion bottles; small wooden merchant carrying frame on the back with a folded cloth bundle (compact, not a modern backpack); small brass open-circle pendant on a cord; dark trousers, worn leather boots; no hood up, no weapons, no armor, no modern clothing; detailed dark fantasy pixel art, soft top-left lighting",
+        "name": "eldric",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "outline": "single color black outline",
+        "detail": "high detail"
+      },
+      "animations": {
+        "idle": {
+          "animation_group_id": "3d8a8662-141b-49d4-bfc4-a38876e57309",
+          "jobs": {
+            "south": "6c5f63fa-ee14-4994-9c4a-14eed7957292",
+            "south-east": "fb90023c-a261-4c38-af4c-62372a4fe0b8",
+            "east": "077b41d9-4f2b-4e8a-a49c-a20a751eb9ce",
+            "north-east": "5216970c-3099-4714-8cc6-5ce56944e30d",
+            "north": "aa01f872-44a9-491d-8034-a37470cdc7b5",
+            "north-west": "9cd9ae5d-44f8-4e71-a2e0-4d3ad88ba6f9",
+            "west": "fbc29a84-1de1-419b-83b7-2ed34bc13343",
+            "south-west": "dce88fdc-9dea-4900-8f68-58f7a9a57f8f"
+          },
+          "request": {
+            "animation_name": "idle",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "subtle idle breathing loop: standing still, chest rises and falls slowly, the coat and satchel barely move, feet stay planted, seamless loop",
+            "frame_count": 4,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "walk": {
+          "animation_group_id": "c07085bd-cb0f-40b7-8377-0af8e35fba72",
+          "jobs": {
+            "south": "f0e9ee6b-2d87-471c-8c27-66343e7f71b9",
+            "south-east": "bc5f779d-b74e-498f-b13c-fecd29e60f5c",
+            "east": "a46237d0-547d-48a3-9436-03c9d809a855",
+            "north-east": "a0f2ac8c-c104-494d-b86e-3418c39af065",
+            "north": "1329da0f-060f-4b83-abba-49d98c5d0337",
+            "north-west": "5b7b13ea-548e-492b-a1e6-778606dbe131",
+            "west": "0586bf61-a671-412e-9593-09d1dfd783d7",
+            "south-west": "50941f0b-58a3-4b4e-a907-94bb3ac2ce31"
+          },
+          "request": {
+            "animation_name": "walk",
+            "mode": "skeleton-v3",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "calm steady walk of a sturdy middle-aged merchant, relaxed posture, arms swing a little, coat tails sway slightly, no wind",
+            "frame_count": 8
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "greet": {
+          "animation_group_id": "29641c64-5607-4646-be81-7d4dac9fa6eb",
+          "jobs": {
+            "south": "44f9cf39-8b90-4751-a888-2b935661461d",
+            "south-east": "74d7f90f-bdba-4428-a97e-2dbd029d644f",
+            "east": "31b7a671-81c0-4070-96da-ce7fa8cb4375",
+            "north-east": "7d9d3d0a-6279-419e-bb80-882fd51e4e39",
+            "north": "78a8136c-dc6d-48aa-99ea-8692e583cfb9",
+            "north-west": "c779e9f8-6bc9-430c-9967-b33e086aceea",
+            "west": "3a2146fa-4619-4480-825d-afc90535ae52",
+            "south-west": "b23e8893-5486-421a-9c8c-b53296ffc437"
+          },
+          "request": {
+            "animation_name": "greet",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "warm familiar greeting: raises one hand to shoulder height in a small wave with a slight nod and smile, then lowers it back, feet stay planted",
+            "frame_count": 8,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "gesture": {
+          "animation_group_id": "0bc48d2c-bc2a-4645-8b0b-9b4f4b16de7c",
+          "jobs": {
+            "south": "89fa5f62-48f0-4f02-b1ac-62e0d751d0df",
+            "south-east": "b97b357b-88d9-4150-9f91-428d77dc6d8f",
+            "east": "4f2ebf37-805a-4b49-bf2e-f81887063608",
+            "north-east": "2e3018af-1481-4bba-a532-8fde8cc39cbb",
+            "north": "5e394743-d619-4510-9318-4ed32063be9b",
+            "north-west": "53cdd9f5-9d99-42a1-b98e-4974bc5e93bc",
+            "west": "eaf862c8-cc5f-4819-b203-b9e955da63f1",
+            "south-west": "ec0a32b1-87c4-431e-97b1-2e1fdf2744ba"
+          },
+          "request": {
+            "animation_name": "gesture",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "natural talking gesture: opens one hand forward palm up as if presenting something, small nod, then returns to a relaxed stance, feet stay planted",
+            "frame_count": 8,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        }
+      }
+    },
+    "child_after": {
+      "character_id": "d3487217-31d0-4d7e-9c25-f9d7e349ce23",
+      "character_job": "d0cb23d8-3a78-4e18-ae78-2451be234600",
+      "character_request": {
+        "description": "the same person as the concept portrait but as an eight year old child: small child body proportions, short legs, soft round young face, small amber eyes; messy ash-brown hair with a few irregular natural silver-white strands on one side; damaged ivory ceremonial tunic with a high collar and thin charcoal-black ritual embroidery, a dark sash crossing the chest, torn hem; a heavy dark metal restraint cuff on one wrist; a small black broken circle mark on the side of the neck; dark trousers, worn small boots; frightened, tired; dark fantasy pixel art",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "method": "create_from_concept",
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "style_character_id": "8872497d-7c92-4520-b77d-70385d385f8c",
+        "concept": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/hero_portrait_final.png"
+      }
+    },
+    "child_before": {
+      "character_id": "656ab244-c541-483e-8353-67f6ef96b35e",
+      "character_job": "84969509-5c6f-4681-ba0d-033b950f08a2",
+      "character_request": {
+        "description": "the same eight year old child as the concept image, same face and same messy hair shape, but BEFORE the exile: hair entirely ash-brown with no silver or white strands at all; simple plain undyed ivory linen shirt with a soft round collar and simple linen trousers, a plain cloth belt, small leather shoes; no ceremonial collar, no embroidery, no sash, no wrist restraint, no neck mark; clothes clean and intact; shy, quiet; dark fantasy pixel art",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "method": "create_from_concept",
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "style_character_id": "8872497d-7c92-4520-b77d-70385d385f8c",
+        "concept": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/child_after_s_x8.png"
+      }
+    },
+    "eldric_young": {
+      "character_id": "3c5f9b35-2424-470b-95ad-2208a004cf05",
+      "character_job": "7d0bf9bb-8264-494b-8ec1-f4fee248ae7c",
+      "character_request": {
+        "description": "the same man as the concept portrait, Eldric the travelling merchant, but about ten years younger, around 40: same face, dark chestnut-brown hair swept back with no gray at all, shorter neater chestnut beard, fewer wrinkles; the same knee-length dark moss-green wool merchant coat with brown leather panels and brass fasteners but less worn, burgundy tunic, dark brown leather waistcoat, belt with coin pouches and keys, leather satchel, small wooden carrying frame on the back; NO pendant; worn leather boots; full body; dark fantasy pixel art",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "method": "create_from_concept",
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "style_character_id": "aa61a1d2-4d66-4ff5-8a06-6eac1b9ad02a",
+        "concept": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/eldric_portrait_v1.png"
+      }
+    },
+    "eldric4": {
+      "character_id": "8f217880-84be-424f-8b10-6af77ec12c1d",
+      "character_job": "1acd836d-1ac4-4256-9f3c-50ffce98b45d",
+      "character_request": {
+        "description": "the same man as the concept portrait, Eldric the travelling merchant, about 50 years old: same face, dark chestnut-brown hair swept back with a few gray strands, short slightly unkempt beard; knee-length dark moss-green wool merchant coat with weathered brown leather panels, wide folded collar and small brass fasteners; burgundy tunic, cream undershirt, dark brown leather waistcoat; belt with small coin pouches, a ring of old iron keys and a small leather ledger; leather satchel at the hip; small brass open-circle pendant on a cord; on his back the same small wooden merchant carrying frame as his younger self, with a folded cloth bundle and a rolled blanket tied to it (no modern backpack, no glowing bottles); worn leather boots; full body; dark fantasy pixel art",
+        "image_size": {
+          "width": 48,
+          "height": 48
+        },
+        "method": "create_from_concept",
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": true,
+        "style_character_id": "3c5f9b35-2424-470b-95ad-2208a004cf05",
+        "concept": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/eldric_portrait_v1.png"
+      },
+      "animations": {
+        "idle": {
+          "animation_group_id": "79744515-5dca-4770-9f12-921535679a06",
+          "jobs": {
+            "south": "4df0c3b3-c22b-4737-bd54-3be55069bdef",
+            "south-east": "7e7c7b52-2240-415e-bcae-09588104067e",
+            "east": "395a1ba0-8e63-4b64-b411-b08037820d0f",
+            "north-east": "5139624c-1e20-4163-83e6-490bb530454c",
+            "north": "61b14c9f-730f-4d33-ba0a-42342919c520",
+            "north-west": "f4bf742e-0a5a-4311-aa14-21c46bfea971",
+            "west": "254b1d86-dc84-412a-8d78-f017554442c9",
+            "south-west": "c38f008a-bb1f-42c6-bc11-63b35dd1f2e8"
+          },
+          "request": {
+            "animation_name": "idle",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "subtle idle breathing loop: standing still, chest rises and falls slowly, the coat and satchel barely move, feet stay planted, seamless loop",
+            "frame_count": 4,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame with a cloth bundle on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "walk": {
+          "animation_group_id": "ced83273-c072-4bfe-9170-70d73e93ddce",
+          "jobs": {
+            "south": "6f874e1d-2f7e-4c70-813d-855c5fe7be66",
+            "south-east": "ee2fc0ee-b7f1-4388-aab1-cd39d5bde9a5",
+            "east": "228e2cd2-cf76-4723-bbb0-66895cec10a7",
+            "north-east": "f3ee5e52-34c6-4847-bde7-63dae3f1423e",
+            "north": "3c2946ab-353d-45d7-a036-e7eadeded4cd",
+            "north-west": "603b5aef-1cda-45df-b4f8-e940c1951468",
+            "west": "302d4687-d92c-44a8-be44-96c88adc5863",
+            "south-west": "d5581fcb-c8c8-470b-92b2-7db1e1eeb042"
+          },
+          "request": {
+            "animation_name": "walk",
+            "mode": "skeleton-v3",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "calm steady walk of a sturdy middle-aged merchant, relaxed posture, arms swing a little, coat tails sway slightly, no wind",
+            "frame_count": 8
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "greet": {
+          "animation_group_id": "370904d1-ef7b-41ec-8796-8caa06c620f9",
+          "jobs": {
+            "south": "f2943a81-072b-4a60-8388-0885eb9e29e3",
+            "south-east": "005bbccf-cc75-40f1-90d3-621cbbebaf99",
+            "east": "4e5bc34d-dd30-4352-9894-688d2c57f5c6",
+            "north-east": "18a4f335-c027-44e6-b3f4-fa44d2e607f3",
+            "north": "06d8f1eb-5596-478c-a469-b0f3785e3ed0",
+            "north-west": "b71d2784-627b-45af-9044-73c0097732a9",
+            "west": "a7b71e5b-8b0b-49fd-9792-93d4c3504cf1",
+            "south-west": "685a0c3d-544e-41ba-a530-0cd7eeeccc84"
+          },
+          "request": {
+            "animation_name": "greet",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "warm familiar greeting: raises one hand to shoulder height in a small wave with a slight nod and smile, then lowers it back, feet stay planted",
+            "frame_count": 8,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame with a cloth bundle on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        },
+        "gesture": {
+          "animation_group_id": "86243c78-5ae1-4833-b9bc-58cadb1e095e",
+          "jobs": {
+            "south": "639726f2-f4bd-4c8e-aba0-5c1474f02e24",
+            "south-east": "afa88473-7f45-40ec-be4d-96e06ace3f6f",
+            "east": "ca77642f-1ed0-4af9-a59e-c543bd558907",
+            "north-east": "12556a14-081e-4ff0-9185-74f18c82a067",
+            "north": "169b5dfe-5d97-43d9-a9bd-5881639a0bd8",
+            "north-west": "bd3220b1-5770-4b1b-a414-b6b47ea22f58",
+            "west": "e9c96ed9-77d0-44df-9082-5e2e36585886",
+            "south-west": "8d86de4c-b56e-49de-a1de-53757faceff4"
+          },
+          "request": {
+            "animation_name": "gesture",
+            "mode": "pixminimax",
+            "directions": [
+              "south",
+              "south-east",
+              "east",
+              "north-east",
+              "north",
+              "north-west",
+              "west",
+              "south-west"
+            ],
+            "action_description": "natural talking gesture: opens one hand forward palm up as if presenting something, small nod, then returns to a relaxed stance, feet stay planted",
+            "frame_count": 8,
+            "subject_description": "a middle-aged medieval merchant in a long moss-green coat with a small wooden carrying frame with a cloth bundle on his back",
+            "keep_first_frame": false
+          },
+          "status": {
+            "south": "completed",
+            "south-east": "completed",
+            "east": "completed",
+            "north-east": "completed",
+            "north": "completed",
+            "north-west": "completed",
+            "west": "completed",
+            "south-west": "completed"
+          }
+        }
+      }
     }
   },
   "icons": {
@@ -909,6 +1322,202 @@
         ]
       },
       "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/intro_5.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "portrait_hero_v1": {
+      "request": {
+        "description": "detailed hand-crafted dark fantasy pixel art bust portrait, chest-up, three-quarter view facing slightly left, of an androgynous 18 year old young adult with soft narrow face and narrow jaw, pale skin with warm undertones, natural realistic proportions, small natural amber eyes, calm slightly tired melancholic gaze, closed mouth, medium-length messy layered ash-brown hair with irregular natural pale silver-white strands mostly on one side, fringe over the forehead; aged ivory ceremonial tunic with a high slightly structured collar, thin charcoal-black ritual embroidery on the collar, a dark asymmetrical fabric sash crossing the chest, small repaired tears; a small black broken incomplete circle inscription mark on the side of the neck; muted controlled shading, crisp pixel clusters, black outline, no anti-aliasing, not anime, not chibi, medieval fantasy JRPG portrait, transparent background",
+        "image_size": {
+          "width": 192,
+          "height": 192
+        },
+        "no_background": true,
+        "style": null,
+        "refs": [
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/player_s_x6.png::this is the same character as a small game sprite: keep the exact hair colors and arrangement (ash-brown with irregular silver-white strands), the ivory tunic, the dark diagonal sash",
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/player_se_x6.png::same character, three-quarter view"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/hero_portrait_v1.png",
+      "usage": {
+        "type": "generations",
+        "generations": 10.0
+      }
+    },
+    "portrait_hero_v2": {
+      "request": {
+        "description": "detailed hand-crafted dark fantasy pixel art bust portrait, chest-up, three-quarter view facing slightly left, of an androgynous 18 year old young adult with soft narrow face and narrow jaw, pale skin with warm undertones, natural realistic proportions, small natural amber eyes, calm slightly tired melancholic gaze, closed mouth, medium-length messy layered warm ash-brown hair with irregular natural pale silver-white strands mostly on one side, fringe over the forehead; aged ivory ceremonial tunic with a high slightly structured collar, charcoal-black ritual embroidery lines on the ivory collar, a dark charcoal asymmetrical fabric sash crossing the chest, a few neatly repaired seams; a thin black broken incomplete circle inscription on the side of the neck below the ear; muted controlled shading, crisp pixel clusters, dark outline, no anti-aliasing, not anime, medieval fantasy JRPG portrait, transparent background",
+        "image_size": {
+          "width": 192,
+          "height": 192
+        },
+        "no_background": true,
+        "style": null,
+        "refs": [
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/hero_portrait_v1.png::keep this exact face, hair shape, pose, framing and rendering style; only fix the details described",
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/player_s_x6.png::same character as a small game sprite: warm ash-brown hair with irregular silver-white strands, ivory tunic, dark diagonal sash"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/hero_portrait_v2.png",
+      "usage": {
+        "type": "generations",
+        "generations": 10.0
+      }
+    },
+    "portrait_eldric_v1": {
+      "request": {
+        "description": "detailed hand-crafted dark fantasy pixel art bust portrait, chest-up, slightly turned toward the viewer, of Eldric, a medieval travelling merchant about 50 years old, sturdy slightly broad frame, naturally weathered warm face, warm observant hazel eyes, expressive eyebrows, small smile lines around the eyes, a small subtle scar near one eyebrow, recognizable nose, dark chestnut-brown medium-length hair loosely swept back with a few subtle gray strands, short slightly unkempt chestnut beard, calm welcoming expression with a subtle warm smile as if recognizing someone familiar; layered merchant coat of dark moss-green wool with weathered brown leather panels and a wide folded collar, small antique-brass fasteners, muted burgundy tunic with a cream undershirt visible at the neckline, dark brown leather waistcoat, a leather strap of a satchel across the chest, a small old brass pendant shaped like an open circle on a cord; natural skin tones, crisp pixel clusters, controlled shading, dark outline, no anti-aliasing, not anime, not a soldier, not a wizard, no modern clothing, transparent background",
+        "image_size": {
+          "width": 192,
+          "height": 192
+        },
+        "no_background": true,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/hero_portrait_final.png",
+        "refs": [
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/eldric_south_x6.png::this is the same man as a small game sprite: keep his chestnut hair and beard, moss-green coat with brown leather, burgundy tunic and leather straps",
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/eldric_south-east_x6.png::same man, three-quarter view"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/gen/eldric_portrait_v1.png",
+      "usage": {
+        "type": "generations",
+        "generations": 10.0
+      }
+    },
+    "scene1_v1": {
+      "request": {
+        "description": "cinematic wide shot, dark fantasy pixel art illustration: an immense ancient hall built from dark stone, enormous tall pillars engraved from base to top with thousands of tiny carved soul inscriptions, a circular stone platform engraved with a ring of runes in the middle of the floor, a single narrow shaft of pale cold light falling from high above onto the platform, a small eight year old child with brown hair in simple plain ivory linen clothes standing alone at the centre of the platform, the child is tiny compared to the monumental intimidating architecture, floating dust in the light, cold desaturated blue-gray palette with a pale warm light, no other people, crisp pixel clusters, controlled shading",
+        "image_size": {
+          "width": 480,
+          "height": 272
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": [
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/child_before_south-east_x8.png::the small child standing on the platform: same brown hair and plain ivory linen clothes, child proportions"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/scenes/s1.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "scene5_v1": {
+      "request": {
+        "description": "a cold misty landscape beneath an overcast gray sky: ancient stone ruins rise beyond a dark pine forest in the background, a damp grassy meadow in the foreground; a small eight year old child lies unconscious on the wet grass in the foreground, wearing a damaged ivory ceremonial tunic with a dark sash, brown hair with partly silver-white strands, child proportions; far away on a path near the forest edge a small figure of a travelling merchant in a long moss-green coat with a wooden carrying frame on his back walks toward the child; quiet, unfamiliar, beautiful and unsettling; crisp pixel clusters, controlled shading, consistent cold desaturated blue-gray palette, dark fantasy pixel art, cinematic wide shot",
+        "image_size": {
+          "width": 480,
+          "height": 272
+        },
+        "no_background": false,
+        "style_options": {
+          "color_palette": false,
+          "outline": true,
+          "detail": true,
+          "shading": true
+        },
+        "style": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/style_dark.png",
+        "refs": [
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/child_after_south_x8.png::the child lying on the grass: same ivory ceremonial tunic, dark sash, brown hair with silver-white strands",
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/ref/eldric_young_south_x8.png::the distant merchant walking toward the child: moss-green coat, wooden carrying frame, chestnut hair and beard",
+          "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/art/menu_art_480.png::the same world of Asthya: similar ruins and mountains, same mood"
+        ]
+      },
+      "file": "/tmp/claude-0/-home-user-game-project/af1a12f0-296e-56aa-8431-324650fe46a5/scratchpad/scenes/s5.png",
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "scene2_v1": {
+      "request": {
+        "endpoint": "POST /generate-image-v2",
+        "image_size": {
+          "width": 480,
+          "height": 272
+        },
+        "style": "scratchpad art/style_dark.png",
+        "summary": "judgment chamber (refs: scene 1 architecture, child_before)"
+      },
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      },
+      "note": "entry restored by hand (a parallel run overwrote it); prompt in docs/character_references/scene_prompts.md"
+    },
+    "scene3_v1": {
+      "request": {
+        "endpoint": "POST /generate-image-v2",
+        "image_size": {
+          "width": 480,
+          "height": 272
+        },
+        "style": "scratchpad art/style_dark.png",
+        "summary": "ritual chamber (refs: scene 1 architecture, child_after outfit, brown hair)"
+      },
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      },
+      "note": "entry restored by hand (a parallel run overwrote it); prompt in docs/character_references/scene_prompts.md"
+    },
+    "scene4_v1": {
+      "request": {
+        "endpoint": "POST /generate-image-v2",
+        "image_size": {
+          "width": 480,
+          "height": 272
+        },
+        "style": "scratchpad art/style_dark.png",
+        "summary": "void fall (refs: child_after, scene 1 architecture)"
+      },
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      },
+      "note": "entry restored by hand (a parallel run overwrote it); prompt in docs/character_references/scene_prompts.md"
+    },
+    "scene3b_edit": {
+      "request": {
+        "endpoint": "POST /edit-images-v2",
+        "method": "edit_with_text",
+        "image_size": {
+          "width": 480,
+          "height": 254
+        },
+        "summary": "intro_3 -> intro_3b (ritual climax, hair partly silver)"
+      },
+      "usage": {
+        "type": "generations",
+        "generations": 25.0
+      }
+    },
+    "scene5b_edit": {
+      "request": {
+        "endpoint": "POST /edit-images-v2",
+        "method": "edit_with_text",
+        "image_size": {
+          "width": 480,
+          "height": 254
+        },
+        "summary": "intro_5 -> intro_5b (Eldric kneels beside the child)"
+      },
       "usage": {
         "type": "generations",
         "generations": 25.0

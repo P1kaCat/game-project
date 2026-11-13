@@ -1,0 +1,15 @@
+{
+ "bust": [
+  16,
+  4,
+  160,
+  160
+ ],
+ "face": [
+  58,
+  30,
+  72,
+  72
+ ],
+ "note": "dialogue framing: bust = region shown 1:1 above the box; face = region shown on narrow screens"
+}

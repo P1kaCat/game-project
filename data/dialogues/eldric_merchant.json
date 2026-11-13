@@ -3,81 +3,72 @@
   "speaker": "eldric",
   "start": "greet",
   "start_rules": [
-    { "condition": { "flag": "eldric_intro_done", "equals": false }, "node": "intro_1" }
+    { "condition": { "flag": "eldric_intro_done", "equals": false }, "node": "morning_1" }
   ],
   "nodes": {
-    "intro_1": {
-      "text": "Eh bien... Je commençais à croire que tu ne te réveillerais jamais.",
+    "morning_1": {
+      "text": "Ah, te voilà enfin ! Je commençais à croire que tu allais dormir jusqu'à demain.",
       "anim": "greet",
-      "next": "intro_2"
+      "next": "morning_2"
     },
-    "intro_2": { "speaker": "player", "text": "Où suis-je ?", "next": "intro_3" },
-    "intro_3": { "text": "En Asthya, évidemment.", "next": "intro_4" },
-    "intro_4": { "speaker": "player", "text": "Asthya... ?", "next": "intro_5" },
-    "intro_5": { "text": "Tu n'es vraiment pas d'ici, hein ?", "next": "intro_6" },
-    "intro_6": {
-      "text": "Écoute, je ne sais pas d'où tu viens, mais tu ferais mieux de ne pas rester seul trop longtemps.",
+    "morning_2": { "speaker": "player", "text": "Tu exagères toujours autant.", "next": "morning_3" },
+    "morning_3": { "text": "Et toi, tu es toujours aussi difficile à réveiller.", "next": "morning_4" },
+    "morning_4": {
+      "text": "Bon, viens donc voir ce que j'ai reçu ce matin.",
       "pause": 0.9,
       "anim": "gesture",
       "set_flags": { "eldric_intro_done": true },
-      "next": "intro_choices"
+      "next": "morning_choices"
     },
-    "intro_choices": {
+    "morning_choices": {
       "choices": [
-        { "text": "Tu peux m'aider ?", "next": "help_1" },
-        { "text": "Qu'est-ce que cet endroit ?", "next": "place_1" },
-        { "text": "Je dois partir.", "next": "leave_1", "cancel": true }
+        { "text": "Montre-moi.", "next": "show" },
+        { "text": "Tu as trouvé quelque chose d'intéressant ?", "next": "news_1" },
+        { "text": "Je reviendrai plus tard.", "next": "later", "cancel": true }
       ]
     },
-    "help_1": {
-      "text": "T'aider ? Je suis marchand, pas guérisseur... Mais sans équipement, tu ne feras pas long feu par ici.",
-      "next": "help_2"
+    "news_1": {
+      "text": "Une caisse de potions d'un herboriste de la vallée, et une lame correcte, pour une fois.",
+      "next": "news_2"
     },
-    "help_2": {
-      "text": "Jette un œil à ce que je transporte. Pour un premier client, je ferai un prix honnête.",
+    "news_2": {
+      "text": "Ne fais pas cette tête. Je te ferai un prix... presque honnête.",
       "anim": "gesture",
-      "next": "menu"
+      "next": "morning_choices"
     },
-    "place_1": {
-      "text": "La prairie au pied des ruines. Plus personne ne se souvient de qui les a bâties.",
-      "next": "place_2"
+    "later": {
+      "text": "Comme tu veux. Mais ne t'éloigne pas trop du chemin, d'accord ?",
+      "next": "end"
     },
-    "place_2": {
-      "text": "Ce qui rôde au-delà de la forêt, en revanche... ça, tout le monde le connaît. Reste près du chemin.",
-      "next": "intro_choices"
-    },
-    "leave_1": {
-      "text": "Comme tu voudras. Je ne bouge pas d'ici pour l'instant.",
-      "next": "leave_2"
-    },
-    "leave_2": {
-      "text": "Si tu changes d'avis, j'ai de quoi t'équiper. Ne traîne pas dehors une fois la nuit tombée.",
+    "show": {
+      "text": "Voilà. Prends ton temps, je ne vais nulle part.",
+      "actions": [ { "type": "open_shop", "shop": "eldric" } ],
       "next": "end"
     },
     "greet": {
-      "text": "Bienvenue, voyageur ! Tu tombes bien, j'ai quelques marchandises qui pourraient t'intéresser.",
+      "text": "Alors, tu as besoin de quelque chose ?",
       "anim": "greet",
       "next": "menu"
     },
     "menu": {
       "choices": [
         { "text": "Montre-moi tes marchandises.", "next": "shop" },
-        { "text": "Qui es-tu ?", "next": "who" },
-        { "text": "Non merci.", "next": "bye", "cancel": true }
+        { "text": "Comment vont les affaires ?", "next": "trade" },
+        { "text": "Rien pour l'instant.", "next": "bye", "cancel": true }
       ]
     },
     "shop": {
-      "text": "Avec plaisir ! Prends ton temps.",
+      "text": "Avec plaisir. Fais ton choix.",
       "actions": [ { "type": "open_shop", "shop": "eldric" } ],
       "next": "end"
     },
-    "who": {
-      "text": "Je m'appelle Eldric. Je voyage de village en village pour vendre mes trouvailles.",
-      "set_flags": { "met_eldric": true },
+    "trade": {
+      "text": "Les routes sont calmes ces temps-ci. C'est bien ça qui m'inquiète.",
+      "set_flags": { "asked_trade": true },
       "next": "menu"
     },
     "bye": {
-      "text": "À bientôt, voyageur !",
+      "text": "D'accord. Je reste dans le coin.",
       "next": "end"
     }
   }

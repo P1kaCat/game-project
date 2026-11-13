@@ -207,23 +207,60 @@ func _test_new_game_full_cinematic() -> void:
 	check("cinematic: tap advances the line", c.current_line == "Un nom que nul ne pouvait effacer.", c.current_line)
 	check("cinematic: tap does not skip", not c.skipped and not c.done)
 	Engine.time_scale = 12.0
-	var seen_voice := [false]
-	var seen_last := [false]
+	var seen := {"voice": false, "eldric": false, "crossfade3": false, "portrait": false, "scenes": {}, "art_ok": true}
 	var watcher := func() -> bool:
-		if c.current_line == "Une âme sans inscription ne peut appartenir à notre monde.":
-			seen_voice[0] = true
-		if c.current_line == "Je n'avais plus de monde auquel appartenir.":
-			seen_last[0] = true
-		if c.current_scene == 2 and _shots != "" and c._portrait.visible and not has_meta("shot3"):
-			set_meta("shot3", true)
-			shot("cinematic_3")
-		return c.done or not is_instance_valid(c)
-	await until(watcher, 60)
+		if not is_instance_valid(c):
+			return true
+		seen.scenes[c.current_scene] = true
+		if c.current_line == "Tu seras rejeté au-delà de ses frontières." and c.current_speaker == "authority":
+			seen.voice = true
+		if c.current_line == "Doucement... Tu es en sécurité." and c.current_speaker == "eldric":
+			seen.eldric = true
+		if c.current_scene == 2 and c._image_b.modulate.a > 0.5:
+			seen.crossfade3 = true
+			if _shots != "" and not has_meta("shot3"):
+				set_meta("shot3", true)
+				shot("cinematic_3b")
+		if _shots != "":
+			for k in [[1, "cinematic_2"], [3, "cinematic_4"]]:
+				if c.current_scene == k[0] and c._subtitle.modulate.a > 0.9 and not has_meta(k[1]):
+					set_meta(k[1], true)
+					shot(k[1])
+			if c.current_scene == 4 and c._image_b.modulate.a > 0.95 and c.current_speaker == "eldric" and not has_meta("s5b"):
+				set_meta("s5b", true)
+				shot("cinematic_5b")
+			if c._caption.modulate.a > 0.9 and not has_meta("cap"):
+				set_meta("cap", true)
+				shot("cinematic_caption")
+		for r in [c._image, c._image_b]:
+			if r.texture and Vector2(r.texture.get_size()) != c.ART_SIZE:
+				seen.art_ok = false
+		# no gameplay dialogue portrait over the illustrations
+		if c.find_children("*", "NinePatchRect", true, false).size() > 0:
+			seen.portrait = true
+		return c.done
+	await until(watcher, 90)
 	Engine.time_scale = 1.0
-	check("cinematic: authority voice line shown", seen_voice[0])
-	check("cinematic: all 5 scenes played", c.current_scene == 4)
-	check("cinematic: last narration line", seen_last[0])
-	check("cinematic: title ASTHYA shown", c._title.texture != null and c._title.modulate.a > 0.0)
+	check("cinematic: all 5 scenes played", seen.scenes.size() == 5 and c.current_scene == 4, str(seen.scenes.keys()))
+	check("cinematic: authority lines", seen.voice)
+	check("cinematic: hair changes during the ritual (3 -> 3b)", seen.crossfade3)
+	check("cinematic: Eldric's words in scene 5", seen.eldric)
+	check("cinematic: same framing for every illustration", seen.art_ok)
+	check("cinematic: no dialogue portrait overlay", not seen.portrait)
+	check("cinematic: title ASTHYA then 'Dix années plus tard.'", c._title.texture != null and c._caption.text == "Dix années plus tard.")
+	var expected := ["Dans le monde où je suis né, chaque âme portait une inscription.", "Un nom que nul ne pouvait effacer.",
+		"Une preuve de notre existence.", "Mais moi...", "Je n'en avais aucune.",
+		"Je ne comprenais pas pourquoi ils avaient peur de moi.", "Je n'avais fait de mal à personne.",
+		"Pourtant, ils ont effacé mon nom.", "Et interdit à ceux que j'aimais de me revoir.",
+		"Une âme sans inscription ne peut appartenir à notre monde.", "Tu seras rejeté au-delà de ses frontières.",
+		"Je me souviens du froid.", "Du silence.", "Et de cette sensation...", "Comme si quelque chose essayait de m'effacer.",
+		"Que l'existence elle-même te rejette.", "Puis tout a disparu.",
+		"Je pensais que j'allais mourir.", "Que personne ne se souviendrait de moi.", "Mais au-delà du vide...", "Il existait un autre monde.",
+		"Je ne savais pas où j'étais.", "Je ne connaissais ni cette terre...", "...ni ceux qui y vivaient.", "Mais ce jour-là...",
+		"Quelqu'un m'a trouvé.", "Par les anciennes pierres...", "Qu'est-ce qu'un enfant fait ici, tout seul ?",
+		"Doucement... Tu es en sécurité."]
+	check("cinematic: complete French narration in order", c.lines_log == expected,
+		"%d/%d lines" % [c.lines_log.size(), expected.size()])
 	check("cinematic: finished without skipping", c.done and not c.skipped)
 	check("cinematic: intro flag set", GameState.flags.get("intro_seen", false) == true)
 
@@ -251,7 +288,7 @@ func _test_awakening() -> void:
 	check("awakening: get-up animation plays", w.player.sprite.current_state == "getup")
 	await until(func() -> bool: return not w.story_running, 10)
 	check("awakening: control given back", not w.player.is_controls_locked() and w.player.sprite.current_state == "idle")
-	check("awakening: flag set", GameState.flags.get("awakened", false) == true)
+	check("awakening: flags set (entered the main game)", GameState.flags.get("awakened", false) == true and GameState.flags.get("entered_main_game", false) == true)
 	var auto := SaveSystem.load_slot("auto")
 	check("awakening: autosave written and valid", auto.ok and auto.data.flags.get("awakened") == true, str(auto.error))
 	# the player can move
@@ -309,13 +346,13 @@ func _test_first_eldric_dialogue() -> void:
 	var ui: DialogueUI = w.director.dialogue_ui
 	await _talk_to_eldric(w)
 	var step := dm.current_step()
-	check("eldric: first meeting line (exact)", step.get("text", "") == "Eh bien... Je commençais à croire que tu ne te réveillerais jamais.", str(step.get("text", "")))
+	check("eldric: familiar first line (exact)", step.get("text", "") == "Ah, te voilà enfin ! Je commençais à croire que tu allais dormir jusqu'à demain.", str(step.get("text", "")))
 	check("eldric: greet gesture plays", w.eldric.sprite.current_state == "greet")
-	check("eldric: 128 px portrait", ui._portrait.texture != null and ui._portrait.texture.get_size() == Vector2(128, 128))
+	check("eldric: new 192 px portrait shown as a 160 px bust", ui._portrait_src != null and ui._portrait_src.get_size() == Vector2(192, 192)
+		and ui._portrait.size == Vector2(160, 160))
 	await shot("eldric_intro")
-	var expected := [["player", "Où suis-je ?"], ["eldric", "En Asthya, évidemment."], ["player", "Asthya... ?"],
-		["eldric", "Tu n'es vraiment pas d'ici, hein ?"],
-		["eldric", "Écoute, je ne sais pas d'où tu viens, mais tu ferais mieux de ne pas rester seul trop longtemps."]]
+	var expected := [["player", "Tu exagères toujours autant."], ["eldric", "Et toi, tu es toujours aussi difficile à réveiller."],
+		["eldric", "Bon, viens donc voir ce que j'ai reçu ce matin."]]
 	var all_ok := true
 	var detail := ""
 	for e in expected:
@@ -324,25 +361,23 @@ func _test_first_eldric_dialogue() -> void:
 		if s.get("speaker") != e[0] or s.get("text") != e[1]:
 			all_ok = false
 			detail = "%s: %s" % [s.get("speaker"), s.get("text")]
-		if e[0] == "player" and s.get("name") != "???":
-			all_ok = false
-			detail = "player name %s" % s.get("name")
-	check("eldric: scripted exchange (exact lines, '???')", all_ok, detail)
+		if e[0] == "player":
+			check("player line: adult portrait, no name label", ui._portrait_src != null
+				and ui._portrait_src.resource_path.ends_with("player/portrait.png") and not ui._name.visible)
+			ui.finish_typing()
+			await shot("player_line")
+	check("eldric: familiar exchange (exact lines)", all_ok, detail)
 	await _wait_choices(ui)
-	check("eldric: the three choices", _texts(ui) == ["Tu peux m'aider ?", "Qu'est-ce que cet endroit ?", "Je dois partir."], str(_texts(ui)))
-	check("eldric: intro flag set once the exchange is seen", GameState.flags.get("eldric_intro_done", false) == true)
+	check("eldric: the three choices", _texts(ui) == ["Montre-moi.", "Tu as trouvé quelque chose d'intéressant ?", "Je reviendrai plus tard."], str(_texts(ui)))
+	check("eldric: first conversation flag set", GameState.flags.get("eldric_intro_done", false) == true)
 	await shot("eldric_choices")
 	await _choose(ui, 1)
-	check("eldric: 'Qu'est-ce que cet endroit ?' answered", str(dm.current_step().get("node")) == "place_1")
+	check("eldric: 'Tu as trouvé quelque chose d'intéressant ?' answered", str(dm.current_step().get("node")) == "news_1")
 	await _next(ui)
 	await _wait_choices(ui)
-	check("eldric: back to the three choices", _texts(ui).size() == 3 and _texts(ui)[0] == "Tu peux m'aider ?")
+	check("eldric: back to the three choices", _texts(ui).size() == 3 and _texts(ui)[0] == "Montre-moi.")
 	await _choose(ui, 0)
-	check("eldric: 'Tu peux m'aider ?' answered", str(dm.current_step().get("node")) == "help_1")
-	await _next(ui)
-	await _wait_choices(ui)
-	check("eldric: merchant choices now offered", _texts(ui) == ["Montre-moi tes marchandises.", "Qui es-tu ?", "Non merci."], str(_texts(ui)))
-	await _choose(ui, 0)
+	check("eldric: 'Montre-moi.' opens the shop line", str(dm.current_step().get("node")) == "show")
 	await _next(ui)
 	var shop: ShopUI = w.director.shop_ui
 	await until(func() -> bool: return shop.visible, 3)
@@ -369,7 +404,7 @@ func _test_first_eldric_dialogue() -> void:
 		and int(auto.data.player.gold) == GameState.player.gold)
 	# second conversation: regular merchant greeting
 	await _talk_to_eldric(w)
-	check("eldric: later talks use the merchant greeting", str(dm.current_step().get("text", "")).begins_with("Bienvenue, voyageur"),
+	check("eldric: later talks use the merchant greeting", str(dm.current_step().get("text", "")).begins_with("Alors, tu as besoin"),
 		"busy=%s open=%s text=%s" % [w.director.busy, ui.is_open, str(dm.current_step().get("text", "")).left(30)])
 	await _wait_choices(ui)
 	await action(&"ui_cancel")
@@ -444,7 +479,7 @@ func _test_back_to_menu_and_continue() -> void:
 	check("continue: inventory restored", canon.call(GameState.player.inventory.to_dict()) == canon.call(expect.data.player.inventory),
 		canon.call(GameState.player.inventory.to_dict()).left(80))
 	await _talk_to_eldric(w2)
-	check("continue: Eldric remembers (merchant greeting)", str(w2.director.dialogue_manager.current_step().get("text", "")).begins_with("Bienvenue"))
+	check("continue: Eldric remembers (later greeting)", str(w2.director.dialogue_manager.current_step().get("text", "")).begins_with("Alors"))
 	await _wait_choices(w2.director.dialogue_ui)
 	await action(&"ui_cancel")
 	await _next(w2.director.dialogue_ui)
@@ -487,7 +522,7 @@ func _test_corrupted_saves() -> void:
 	var sp: SaveSlotsPanel = panels[0]
 	check("load: corrupted slots disabled and labelled", sp.button_for("2").disabled and sp.button_for("2").text.contains("illisible")
 		and sp.button_for("3").disabled)
-	check("load: valid slot shows region / time / gold", sp.button_for("1").text.contains("Prairie de l'Éveil") and sp.button_for("1").text.contains(" or"),
+	check("load: valid slot shows region / time / gold", sp.button_for("1").text.contains("Campement d'Eldric") and sp.button_for("1").text.contains(" or"),
 		sp.button_for("1").text.replace("\n", " | "))
 	await shot("load_slots")
 	await action(&"ui_cancel")
@@ -531,4 +566,4 @@ func _test_new_game_over_save_and_skip() -> void:
 		check("skip: then the player gets control", not scene().player.is_controls_locked())
 		var w := scene()
 		await _talk_to_eldric(w)
-		check("skip: Eldric introduction available again (new game)", str(w.director.dialogue_manager.current_step().get("text", "")).begins_with("Eh bien"))
+		check("skip: first Eldric conversation again (new game)", str(w.director.dialogue_manager.current_step().get("text", "")).begins_with("Ah, te voilà"))

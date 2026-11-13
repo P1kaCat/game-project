@@ -1,7 +1,8 @@
 extends Node2D
-## The starting area of Asthya ("Prairie de l'Éveil"): builds the isometric map
-## (ground, edge collision, raised solid blocks), places Eldric and the player
-## from GameState (new game: awakening sequence; loaded game: saved position),
+## Eldric's camp, ten years after the protagonist's arrival in Asthya: builds
+## the isometric map (ground, edge collision, raised solid blocks), places
+## Eldric and the player from GameState (new game: the protagonist wakes up
+## from a nap near the camp; loaded game: saved position),
 ## wires the pause menu, autosave and settings. Pass `-- --autotest` to run
 ## scripted verification (scripts/debug/autotest.gd).
 
@@ -17,7 +18,7 @@ extends Node2D
 
 ## Eldric stands on the plaza next to the central crossroads.
 const ELDRIC_CELL := Vector2i(10, 7)
-## Where the protagonist wakes up: near Eldric, not beside him.
+## Where the protagonist naps on a new game: near Eldric's stall, not beside him.
 const AWAKEN_CELL := Vector2i(7, 9)
 ## Seconds between periodic autosaves (also saved after story beats / trades).
 const AUTOSAVE_INTERVAL := 120.0
@@ -130,8 +131,8 @@ func _add_pause_menu() -> void:
 	add_child(pause_menu)
 
 
-## New game: the protagonist lies where the cinematic left them, the view
-## starts on the sky and settles, they get up, then the player takes over.
+## New game (ten years later): the protagonist dozed off near the camp; the
+## view starts on the sky and settles, they get up, then the player takes over.
 func _play_awakening() -> void:
 	story_running = true
 	player.set_controls_locked(true)
@@ -157,6 +158,7 @@ func _play_awakening() -> void:
 	player.set_controls_locked(false)
 	hud.suppressed = false
 	GameState.flags["awakened"] = true
+	GameState.flags["entered_main_game"] = true
 	GameState.awakening_pending = false
 	story_running = false
 	autosave()

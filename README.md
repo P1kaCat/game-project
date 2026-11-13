@@ -3,10 +3,16 @@
 *Un monde au-delà de l'oubli.* Godot 4.7, PC (Windows) + Android, all
 player-facing text in French (localization-ready).
 
-Version 0.6.0 is the first narrative build: main menu → opening cinematic
-("L'Inscriptible", 5 illustrated scenes, hold-to-skip) → awakening in the
-Prairie de l'Éveil → optional first conversation with Eldric, the wandering
-merchant → his shop. Settings, local save slots and a pause menu included.
+Story (0.7.0): born without a soul inscription, an eight-year-old child is
+judged and exiled beyond reality; they arrive in Asthya, where Eldric, a
+travelling merchant, finds them and raises them. The game starts ten years
+later at Eldric's camp: main menu → opening cinematic (5 illustrated scenes,
+child → ritual → fall → arrival, hold-to-skip) → "Dix années plus tard." →
+the protagonist wakes from a nap → a familiar conversation with Eldric (their
+adoptive father) → his shop. Settings, local save slots and a pause menu included.
+
+Character consistency: see `docs/character_references/` (child before / after
+exile, adult, Eldric at ~40 and ~50, portraits, how each was generated).
 
 ## Asthya systems (0.6.0)
 
@@ -16,9 +22,9 @@ merchant → his shop. Settings, local save slots and a pause menu included.
 | Settings | `scripts/core/settings.gd`, `scripts/ui/settings_panel.gd` | `user://settings.cfg`; audio buses, fullscreen (PC only), pixel scale, UI size, text speed, camera smoothing, joystick size/opacity, language |
 | Saves | `scripts/core/game_state.gd`, `scripts/core/save_system.gd`, `scripts/ui/save_slots_panel.gd` | `user://saves/{auto,1,2,3}.json`, SHA-256 checksum, field validation, atomic write + `.bak`; corrupted files shown as unreadable, never loaded |
 | Pause | `scripts/menu/pause_menu.gd` | Escape / Start / Android back / touch button; save, settings, main menu |
-| Cinematic | `scenes/cinematic.tscn`, `scripts/story/cinematic.gd`, `data/story/intro.json` | data-driven beats (narration, voice, flash, portrait, sfx, title); tap = next line, hold 1.2 s = skip |
-| Story start | `scripts/world/test_world.gd` | kneeling → get-up animation → control; autosave after story beats, conversations and every 2 min |
-| Dialogue | `data/dialogues/eldric_merchant.json` | `start_rules` pick the intro or the merchant greeting from saved flags; `anim` / `pause` per line; `player` speaker shown as "???" |
+| Cinematic | `scenes/cinematic.tscn`, `scripts/story/cinematic.gd` (+ `rune_ring.gd`, `skip_hint.gd`), `data/story/intro.json` | data-driven beats (speaker-coloured subtitles, crossfade to a second state of the same illustration, rotating rune ring, dim, flash, shake, sfx, title, caption); every illustration 480x254 shown 1:1 in the same letterbox; no dialogue portraits; tap = next line, hold 1.2 s = skip |
+| Story start | `scripts/world/test_world.gd` | ten years later: the protagonist gets up from a nap near Eldric's camp → control; flags `intro_seen`, `entered_main_game`, `eldric_intro_done`; autosave after story beats, conversations and every 2 min |
+| Dialogue | `data/dialogues/eldric_merchant.json` | `start_rules` pick the first (familiar) conversation or the later greeting from saved flags; `anim` / `pause` per line; 192 px portraits shown 1:1 as a 160 px bust (framing in `portrait.json`), face crop on narrow screens; the player's name label is empty until the protagonist is named |
 | Localization | `scripts/core/loc.gd`, `data/i18n/fr.json` | add `en.json` + `*.en.json` data files for English |
 | UI kit | `scripts/ui/ui_theme.gd`, `tools/ui/make_ui_art.py`, `tools/ui/make_logo.py` | charcoal / ivory / tarnished silver / brass, 9-slice, hand-placed pixels |
 | Audio | `scripts/core/audio.gd`, `tools/audio/synth_sounds.py` | procedurally synthesized ambiences and UI sounds (PixelLab sound effects need a Tier 2 plan) |

@@ -21,6 +21,8 @@ state["npcs"][KEY], selected with the global option --npc KEY.
 
 Also used:
   POST /portrait-character-pro         character sprite -> detailed bust portrait
+  POST /create-character-pro           reference-guided character (concept + style character)
+  POST /edit-images-v2                 text-guided edit keeping the image structure
   POST /create-image-pixen             small transparent images (item icons)
 """
 from __future__ import annotations
@@ -125,6 +127,40 @@ def cmd_create_character(args):
     save_state(root)
     job = poll_job(resp["background_job_id"])
     print("character job:", job["status"], json.dumps(job.get("usage")))
+    if job["status"] != "completed":
+        print(json.dumps(job, indent=2)[:4000])
+
+
+def cmd_charpro(args):
+    """Reference-guided character via POST /create-character-pro (8 rotations):
+    concept image (identity) + style character (an existing sprite's style)."""
+    import base64
+    root = load_state()
+    state = scope(root, args.npc)
+    if state.get("character_id") and not args.force:
+        raise SystemExit(f"Character already exists ({state['character_id']}); pass --force to create another.")
+    body = {
+        "description": args.description,
+        "image_size": {"width": args.size, "height": args.size},
+        "method": "create_from_concept" if args.concept else "create_with_style",
+        "view": "low top-down",
+        "template_id": "mannequin",
+        "no_background": True,
+    }
+    if args.concept:
+        body["concept_image"] = {"type": "base64", "base64": base64.b64encode(Path(args.concept).read_bytes()).decode()}
+    if args.style_character:
+        body["style_character_id"] = args.style_character
+    if args.style_description:
+        body["style_description"] = args.style_description
+    resp = _request("POST", "/create-character-pro", body)
+    stored = {k: v for k, v in body.items() if k != "concept_image"}
+    stored["concept"] = args.concept
+    state.update({"character_id": resp.get("character_id"), "character_job": resp["background_job_id"],
+                  "character_request": stored})
+    save_state(root)
+    job = poll_job(resp["background_job_id"])
+    print("charpro job:", job["status"], json.dumps(job.get("usage")), "character", resp.get("character_id"))
     if job["status"] != "completed":
         print(json.dumps(job, indent=2)[:4000])
 
@@ -343,6 +379,29 @@ def cmd_image2(args):
     save_state(root)
 
 
+def cmd_edit2(args):
+    """Text-guided edit via POST /edit-images-v2 (keeps the original structure,
+    e.g. a second state of the same illustration for a crossfade)."""
+    import base64
+    from PIL import Image
+    w, h = Image.open(args.image).size
+    body = {"method": "edit_with_text", "description": args.description,
+            "edit_images": [{"image": {"type": "base64", "base64": base64.b64encode(Path(args.image).read_bytes()).decode()},
+                             "width": w, "height": h}],
+            "image_size": {"width": w, "height": h}, "no_background": False}
+    if args.seed is not None:
+        body["seed"] = args.seed
+    resp = _request("POST", "/edit-images-v2", body)
+    job = poll_job(resp["background_job_id"], interval=6)
+    print("edit2 job:", job["status"], json.dumps(job.get("usage")))
+    if job["status"] != "completed":
+        raise SystemExit(json.dumps(job, indent=2)[:3000])
+    imgs = (job.get("last_response") or {}).get("images", [])
+    data = imgs[0].get("base64") if isinstance(imgs[0], dict) else imgs[0]
+    Path(args.out).write_bytes(base64.b64decode(data.split(",")[-1]))
+    print("wrote", args.out)
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--npc", help="operate on state['npcs'][NPC] instead of the player")
@@ -360,6 +419,22 @@ def main(argv=None):
     c.add_argument("--seed", type=int)
     c.add_argument("--force", action="store_true")
     c.set_defaults(func=cmd_create_character)
+
+    e2 = sub.add_parser("edit2")
+    e2.add_argument("--image", required=True)
+    e2.add_argument("--description", required=True)
+    e2.add_argument("--out", required=True)
+    e2.add_argument("--seed", type=int)
+    e2.set_defaults(func=cmd_edit2)
+
+    cp = sub.add_parser("charpro")
+    cp.add_argument("--description", required=True)
+    cp.add_argument("--size", type=int, default=64)
+    cp.add_argument("--concept", help="concept image (identity reference), max 1024px")
+    cp.add_argument("--style-character", help="existing character id whose sprites set the style")
+    cp.add_argument("--style-description")
+    cp.add_argument("--force", action="store_true")
+    cp.set_defaults(func=cmd_charpro)
 
     g = sub.add_parser("character")
     g.add_argument("--character-id")

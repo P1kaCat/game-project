@@ -4,23 +4,23 @@
     "generator": "PixelLab API v2",
     "character_endpoint": "POST /v2/create-character-v3",
     "animation_endpoint": "POST /v2/characters/animations",
-    "pixellab_character_id": "6fbd68ec-efe8-433e-8064-fbe8f00991e2",
+    "pixellab_character_id": "8f217880-84be-424f-8b10-6af77ec12c1d",
     "view": "low top-down",
     "character_canvas": [
       48,
       48
     ],
-    "prompt": "full-body wandering merchant, man about 50 years old, slightly stocky build with broad shoulders, realistic proportions, not chibi, weathered lightly tanned face, friendly but attentive expression, dark brown hair with many silver-gray strands, short neat graying beard, hood lowered resting behind the shoulders; thick weathered olive-green travelling coat with visible stitching and worn cuffs; faded burgundy tunic under a dark brown leather vest; wide leather belt with several pouches, a coin purse and old iron keys; dark brown trousers tucked into sturdy mud-stained boots; worn fingerless gloves; large travelling backpack with rolled blankets strapped on top and small potion bottles hanging from it; a small brass lantern hanging from the belt; detailed dark fantasy pixel art, soft top-left lighting"
+    "prompt": "the same man as the concept portrait, Eldric the travelling merchant, about 50 years old: same face, dark chestnut-brown hair swept back with a few gray strands, short slightly unkempt beard; knee-length dark moss-green wool merchant coat with weathered brown leather panels, wide folded collar and small brass fasteners; burgundy tunic, cream undershirt, dark brown leather waistcoat; belt with small coin pouches, a ring of old iron keys and a small leather ledger; leather satchel at the hip; small brass open-circle pendant on a cord; on his back the same small wooden merchant carrying frame as his younger self, with a folded cloth bundle and a rolled blanket tied to it (no modern backpack, no glowing bottles); worn leather boots; full body; dark fantasy pixel art"
   },
   "frame_width": 80,
   "frame_height": 80,
   "pivot": {
     "x": 40,
-    "y": 62,
+    "y": 63,
     "note": "foot contact point in frame pixels"
   },
   "character_body_size_south": [
-    33,
+    34,
     46
   ],
   "directions": [
@@ -45,11 +45,11 @@
   },
   "sheet_layout": "rows = directions in 'directions' order, columns = frames, no spacing",
   "animations": {
-    "gesture": {
-      "sheet": "spritesheets/eldric_gesture.png",
+    "greet": {
+      "sheet": "spritesheets/eldric_greet.png",
       "frames": 8,
-      "frame_duration_ms": 120,
-      "fps": 8.333,
+      "frame_duration_ms": 110,
+      "fps": 9.091,
       "loop": false,
       "rows": [
         "n",
@@ -61,7 +61,7 @@
         "w",
         "nw"
       ],
-      "frame_dir": "gesture/<direction>/frame_NN.png"
+      "frame_dir": "greet/<direction>/frame_NN.png"
     },
     "idle": {
       "sheet": "spritesheets/eldric_idle.png",
@@ -81,11 +81,11 @@
       ],
       "frame_dir": "idle/<direction>/frame_NN.png"
     },
-    "greet": {
-      "sheet": "spritesheets/eldric_greet.png",
+    "gesture": {
+      "sheet": "spritesheets/eldric_gesture.png",
       "frames": 8,
-      "frame_duration_ms": 110,
-      "fps": 9.091,
+      "frame_duration_ms": 120,
+      "fps": 8.333,
       "loop": false,
       "rows": [
         "n",
@@ -97,7 +97,7 @@
         "w",
         "nw"
       ],
-      "frame_dir": "greet/<direction>/frame_NN.png"
+      "frame_dir": "gesture/<direction>/frame_NN.png"
     },
     "walk": {
       "sheet": "spritesheets/eldric_walk.png",
@@ -122,9 +122,12 @@
   "portrait": {
     "file": "portrait.png",
     "size": [
-      128,
-      128
+      192,
+      192
     ],
-    "source": "POST /v2/portrait-character-pro (character_to_portrait, from rotations/s)"
-  }
+    "source": "POST /v2/generate-image-v2 (192 px, guided by the sprite; protagonist portrait as style image)"
+  },
+  "notes": [
+    "Hair: grays in the head area recoloured to chestnut on every frame (tools/pixellab/recolor_hair.py) so Eldric reads ~50, matching his portrait."
+  ]
 }

@@ -77,7 +77,7 @@ func _test_talk_and_typewriter() -> void:
 	t.check("talk: player locked + touch controls hidden", player.is_controls_locked() and not world.hud.visible)
 	t.check("talk: player faces Eldric", player.facing == "e", player.facing)
 	t.check("talk: Eldric faces the player", eldric.facing == "w", eldric.facing)
-	t.check("talk: first line from data", dm.current_step().get("text", "").begins_with("Bienvenue, voyageur"))
+	t.check("talk: first line from data", dm.current_step().get("text", "").begins_with("Alors, tu as besoin"))
 	t.check("typewriter: text appears progressively", ui.is_typing and ui._text.visible_characters < ui._text.get_total_character_count(),
 		"%d/%d chars" % [ui._text.visible_characters, ui._text.get_total_character_count()])
 	t._release([&"move_right"])
@@ -91,7 +91,7 @@ func _test_talk_and_typewriter() -> void:
 	_action(&"ui_accept")
 	await t._wait(0.05)
 	t.check("typewriter: confirm completes the line instantly", not ui.is_typing and ui._text.visible_characters == -1)
-	t.check("dialogue: 3 choices shown", _choice_texts() == ["Montre-moi tes marchandises.", "Qui es-tu ?", "Non merci."],
+	t.check("dialogue: 3 choices shown", _choice_texts() == ["Montre-moi tes marchandises.", "Comment vont les affaires ?", "Rien pour l'instant."],
 		str(_choice_texts()))
 	_action(&"ui_accept")
 	_action(&"ui_accept")
@@ -106,17 +106,17 @@ func _test_talk_and_typewriter() -> void:
 
 func _test_branch_who_and_back() -> void:
 	await _choose_by_keyboard(1)
-	t.check("branch 2: Eldric introduces himself", str(dm.current_step().get("text", "")).begins_with("Je m'appelle Eldric"),
+	t.check("branch 2: Eldric talks about trade", str(dm.current_step().get("text", "")).begins_with("Les routes sont calmes"),
 		str(dm.current_step().get("text", "")).left(30))
 	await _finish_line()
-	t.check("branch 2: back to the initial choices", _choice_texts().size() == 3 and dm.current_step().node == "who")
-	t.check("dialogue: flag set for future quests", dm.flags.get("met_eldric", false) == true)
+	t.check("branch 2: back to the initial choices", _choice_texts().size() == 3 and dm.current_step().node == "trade")
+	t.check("dialogue: flag set for future quests", dm.flags.get("asked_trade", false) == true)
 
 
 func _test_open_shop_and_buy() -> void:
 	await t._wait(0.3)
 	await _click(ui.choice_buttons()[0])
-	t.check("branch 1: 'Avec plaisir !'", str(dm.current_step().get("text", "")).begins_with("Avec plaisir"))
+	t.check("branch 1: 'Avec plaisir.'", str(dm.current_step().get("text", "")).begins_with("Avec plaisir"))
 	await _confirm_until_closed()
 	await t._wait(0.4)
 	t.check("shop: opens after the line", shop.is_open and not ui.is_open and director.busy)
@@ -197,7 +197,7 @@ func _test_goodbye_by_touch() -> void:
 	t.check("touch: tap completes the line", not ui.is_typing and _choice_texts().size() == 3)
 	await t._wait(0.3)
 	await _tap(ui.choice_buttons()[2].get_global_rect().get_center())
-	t.check("branch 3: 'À bientôt, voyageur !'", str(dm.current_step().get("text", "")) == "À bientôt, voyageur !",
+	t.check("branch 3: 'D'accord. Je reste dans le coin.'", str(dm.current_step().get("text", "")) == "D'accord. Je reste dans le coin.",
 		str(dm.current_step().get("text", "")))
 	await _confirm_until_closed(true)
 	await t._wait(0.4)
@@ -213,7 +213,7 @@ func _test_escape_cancels() -> void:
 	await t._wait(0.35)
 	_action(&"ui_cancel")
 	await t._wait(0.1)
-	t.check("Escape on choices: picks 'Non merci'", str(dm.current_step().get("text", "")) == "À bientôt, voyageur !")
+	t.check("Escape on choices: picks 'Rien pour l'instant.'", str(dm.current_step().get("text", "")) == "D'accord. Je reste dans le coin.")
 	await _confirm_until_closed()
 	await t._wait(0.4)
 	t.check("Escape flow: closed", not director.busy)

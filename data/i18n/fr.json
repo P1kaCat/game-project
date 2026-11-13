@@ -63,8 +63,9 @@
   "pause.main_menu": "Menu principal",
   "pause.confirm_menu": "Revenir au menu principal ?\nLa progression depuis la dernière sauvegarde sera perdue.",
   "cinematic.hold_to_skip": "Maintenir pour passer",
-  "region.asthya_meadow": "Prairie de l'Éveil",
-  "name.player": "???",
+  "region.asthya_meadow": "Campement d'Eldric",
+  "name.player": "",
   "name.eldric": "Eldric",
-  "hint.autosave": "Sauvegarde automatique…"
+  "hint.autosave": "Sauvegarde automatique…",
+  "cinematic.ten_years_later": "Dix années plus tard."
 }
